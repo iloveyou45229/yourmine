@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#220d20"><meta name="description" content="Five days, five little adventures, and one very big love.">
+  <title>I WANNA BE YOURS 🧡</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"><span>♥</span><span>✦</span><span>♥</span><span>♡</span><span>✧</span><span>♥</span><span>♡</span></div>
+  <header class="topbar"><a class="brand" href="#top">I WANNA BE YOURS <span>🧡</span></a><div class="top-actions"><span id="registerBadge" class="register-badge">LOVE ID: —</span><button id="soundBtn" class="icon-btn" aria-label="Turn music on or off" title="Music">♫ <span id="soundLabel">Music on</span></button></div></header>
+  <main id="top" class="wrap">
+    <section class="hero panel">
+      <div class="eyebrow">A LITTLE UNIVERSE MADE JUST FOR YOU</div>
+      <h1 id="heroTitle">Five days.<br><em>One forever.</em></h1>
+      <p id="heroSubtitle">Every puzzle brings you closer to a little piece of us.</p>
+      <div class="hero-row"><div><div class="tiny-label">YOUR JOURNEY</div><div id="dayName" class="day-name">Day 1 of 5</div><div id="dayDate" class="muted">Your story begins when you open this page.</div></div><div class="hero-heart" aria-hidden="true">🧡</div></div>
+      <div class="progress" aria-label="Five day streak"><div id="progressFill"></div></div><div id="streakLine" class="streak-line">🧡 0 / 5 days collected</div>
+    </section>
+
+    <section id="notReady" class="panel notice hidden"><div class="notice-icon">🌙</div><h2>A tiny wait, my love</h2><p id="notReadyText">Your next adventure is getting ready.</p><p class="muted">Your collected hearts and journey are saved on this device.</p></section>
+
+    <section id="gamePanel" class="panel game-panel">
+      <div class="section-kicker" id="gameKicker">TODAY'S LITTLE ADVENTURE</div><div class="game-heading"><div><h2 id="gameTitle">The Memory of Us</h2><p id="gameDescription">A playful brain warm-up made with love.</p></div><span id="difficulty" class="difficulty">EASY-ish</span></div>
+      <div class="game-meta"><span>⏱ <b id="elapsed">00:00</b> played</span><span>✨ No multiple-choice questions</span></div>
+      <div id="gameArea" class="game-area"></div>
+      <div id="gameFeedback" class="feedback" role="status" aria-live="polite"></div>
+      <div class="game-actions"><button id="newGameBtn" class="btn btn-secondary">↻ New game / Reset</button><button id="hintBtn" class="btn btn-quiet">💌 Give me a hint</button></div>
+      <p class="small-note">The 10-minute target is a fun challenge, not a lock. If you solve the puzzle sooner, your orange heart is awarded immediately.</p>
+    </section>
+
+    <section id="revealPanel" class="panel reveal-panel hidden"><div class="section-kicker">A PIECE OF MY HEART</div><h2 id="revealTitle">A little piece of us…</h2><p id="revealCopy">You unlocked it!</p><div id="photoGrid" class="photo-grid" aria-label="Our photo, revealed in four parts"></div><div id="photoHelp" class="photo-help">Add your picture as <code>assets/love-photo.jpg</code> to see your actual photo here.</div><div class="game-actions"><button id="showAllBtn" class="btn btn-secondary">🖼 Preview our picture</button><button id="backToGameBtn" class="btn btn-quiet">Play another round</button></div></section>
+
+    <section id="birthdayPanel" class="panel birthday-panel hidden"><div class="birthday-stars">✦　♡　✦</div><div class="section-kicker">TODAY IS ALL ABOUT YOU</div><h2>Happy Birthday,<br><em>my favourite person.</em></h2><p class="birthday-intro">If I could wrap up every happy moment you have given me, I would fill the whole sky and still have more left over.</p>
+      <div class="heart-game"><div class="tiny-label">TEN ARROWS. ONE VERY STUBBORN HEART.</div><p>Tap “Shoot an arrow” ten times and watch this heart break into love. 🏹</p><div id="targetHeart" class="target-heart" aria-label="Heart target">❤️</div><div class="hit-count"><span id="hitCount">0</span> / 10 hits</div><div class="heart-meter"><div id="heartMeterFill"></div></div><button id="shootBtn" class="btn btn-primary">🏹 Shoot an arrow</button><p id="arrowMessage" class="feedback">Ready, cupid? Aim for the heart!</p></div>
+      <div id="birthdayReveal" class="birthday-reveal hidden"><div id="fullPhoto" class="full-photo"></div><h3>Every piece leads back to you. 🧡</h3><div class="birthday-letter"><p>Happy birthday to the girl who makes ordinary days feel magical.</p><p>You are my favourite notification, my safest place, my unexpected smile, and the person I want beside me for all the little things and all the big things.</p><p><em>“In a world full of temporary things, you are my favourite reason to believe in forever.”</em></p><p>I hope this year gives you a hundred reasons to laugh, the courage to chase every dream, and the same warmth you bring into my life. Keep being your wonderful, wonderfully you.</p><p class="signature">Forever cheering for you,<br><strong>your person 🧡</strong></p></div><button id="dontClickBtn" class="btn btn-primary dont-click">❤️ Don't click me ❤️</button><p class="small-note">(Obviously… you have to click it.)</p></div>
+    </section>
+
+    <section class="panel journey-panel"><div class="section-kicker">OUR FIVE LITTLE CHAPTERS</div><h2>The orange-heart collection</h2><div id="journeyList" class="journey-list"></div><p class="small-note">A missed day never deletes your story. The calendar advances automatically, and the display shows all five hearts as complete once their days have passed.</p></section>
+    <footer>Made with an unreasonable amount of love 🧡 <span>•</span> Your memories stay in this browser.</footer>
+  </main>
+  <dialog id="videoDialog" class="video-dialog"><div class="dialog-head"><h2>One last little surprise 🧡</h2><button id="closeVideo" class="icon-btn" aria-label="Close video">✕</button></div><p>If the video doesn't load, use the button below to open it in Google Drive.</p><div class="video-frame"><iframe id="videoFrame" title="Birthday surprise video" src="about:blank" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div><a class="btn btn-secondary drive-link" href="https://drive.google.com/file/d/1Pl7BaCt0hvG85gwB3FGj5SMbR2zThti9/view?usp=sharing" target="_blank" rel="noopener">Open surprise in Google Drive ↗</a></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body></html>
