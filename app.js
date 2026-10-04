@@ -104,7 +104,854 @@
   function hint(){if(currentDay===1){setFeedback(['Take your time; look for patterns, not speed.','Memory game: say the sequence quietly before tapping.','Word puzzle: tap words in the order they should appear.'][game.mini||0])}else if(currentDay===2)setFeedback('Hint: focus on the order of the four symbols, not how quickly they flash.');else if(currentDay===3)setFeedback('Hint: plan a route to the glowing heart. You can move with the arrow buttons; walls are dark.');else if(currentDay===4)setFeedback('Hint: A=1, B=2, C=3… Use the repeating gaps in the number code.');else toast('Follow your heart 🧡')}
   function finishMini(message){game.score++;setFeedback(message);if(game.score>=3){completeDay(1);$('gameDescription').textContent='All three mini-games cleared! Play again or pick a new mini-game below.';const b=document.createElement('button');b.className='btn btn-primary';b.textContent='Play the mini-games again';b.onclick=()=>{game.score=0;game.mini=0;newGame()};$('gameArea').appendChild(b)}else{game.mini++;setTimeout(()=>renderDay1(),650)}}
   function renderDay1(){const area=$('gameArea');area.innerHTML='';if(game.mini===0){area.innerHTML='<div class="subheading">Mini-game 1 of 3 · Memory Spark</div><p>Watch the four-heart sequence, then tap the matching symbols in the same order. Three rounds to pass.</p><div id="sequenceDisplay" class="sequence-display">Ready? 🧡</div><div class="tiles" id="memoryTiles"></div><div class="center"><button class="btn btn-secondary" id="showSequence">Show sequence</button></div>';const symbols=['🧡','🌙','🌸','⭐'];let seq=[];let round=0;const display=$('sequenceDisplay'),tiles=$('memoryTiles');symbols.forEach(s=>{const b=document.createElement('button');b.className='tile';b.textContent=s;b.onclick=()=>{if(!game.accepting)return;const v=seq[game.step];if(s===v){game.step++;b.classList.add('correct');if(game.step===seq.length){game.accepting=false;round++;if(round>=3)finishMini('Memory Spark cleared! 🧠');else{display.textContent=`Perfect! Round ${round}/3`;setTimeout(next,500)}}}else{display.textContent='Oops! Try that round again 💕';game.step=0;tiles.querySelectorAll('.tile').forEach(x=>x.classList.remove('correct'))}};tiles.appendChild(b)});function next(){seq=Array.from({length:3+round},()=>symbols[Math.floor(Math.random()*symbols.length)]);game.step=0;game.accepting=false;display.textContent=seq.join('  ');setTimeout(()=>{display.textContent='Now repeat it!';game.accepting=true;tiles.querySelectorAll('.tile').forEach(x=>x.classList.remove('correct'))},900)}$('showSequence').onclick=next;next()}else if(game.mini===1){area.innerHTML='<div class="subheading">Mini-game 2 of 3 · Pattern Picnic</div><p>Find the missing number. Tap the answer tile, then solve two more patterns. No MCQs: just tap the number that completes the pattern.</p><h2 class="center" id="patternQuestion"></h2><div class="tiles" id="patternTiles"></div>';const qs=[{q:'2, 4, 8, 16, __',a:32,opts:[24,30,32,36]},{q:'1, 4, 9, 16, __',a:25,opts:[20,24,25,36]},{q:'3, 6, 11, 18, __',a:27,opts:[25,26,27,29]}];let r=0;function draw(){if(r>=qs.length){finishMini('Pattern Picnic complete! Your brain has excellent taste.');return}const q=qs[r];$('patternQuestion').textContent=q.q;$('patternTiles').innerHTML='';q.opts.sort(()=>Math.random()-.5).forEach(n=>{const b=document.createElement('button');b.className='tile';b.textContent=n;b.onclick=()=>{if(n===q.a){r++;draw()}else{b.classList.add('wrong');setFeedback('Not quite, sweetheart. Look at how the numbers grow, then try again!')}};$('patternTiles').appendChild(b)})}draw()}else{area.innerHTML='<div class="subheading">Mini-game 3 of 3 · Build a Love Note</div><p>Tap the words to arrange this scrambled note into a sentence. Tap a placed word to send it back.</p><div id="wordSlots" class="word-slots"></div><div id="wordBank" class="word-bank"></div><div class="center"><button id="checkWords" class="btn btn-primary">Check our little note</button></div>';const words=['you','make','my','ordinary','days','feel','magical'];let order=words.map((w,i)=>({w,i})).sort(()=>Math.random()-.5),chosen=[];const slots=$('wordSlots'),bank=$('wordBank');function draw(){slots.innerHTML='';bank.innerHTML='';chosen.forEach((o,i)=>{const b=document.createElement('button');b.className='slot';b.textContent=o.w;b.onclick=()=>{order.push(o);chosen.splice(i,1);draw()};slots.appendChild(b)});order.forEach(o=>{const b=document.createElement('button');b.className='word-chip';b.textContent=o.w;b.onclick=()=>{chosen.push(o);order=order.filter(x=>x.i!==o.i);draw()};bank.appendChild(b)})}draw();$('checkWords').onclick=()=>{if(chosen.map(x=>x.w).join(' ')==='you make my ordinary days feel magical'){finishMini('Love note assembled perfectly. You make my ordinary days feel magical. 🧡')}else setFeedback('Almost! Rearrange the words into a sentence that makes your heart smile.') }}}
-  function renderDay2(){const area=$('gameArea');area.innerHTML='<div class="subheading">Naruto-inspired challenge · Rebuild the Love Seal</div><p>Four symbols flash in a secret order. Memorise the order, then tap the tiles to rebuild the seal. Complete four rounds; each round gets longer. A little shinobi focus, a lot of love.</p><div id="sealDisplay" class="sequence-display">Ready, kunoichi? 🍥</div><div id="sealTiles" class="tiles"></div><div class="center"><button id="beginSeal" class="btn btn-primary">Reveal the seal</button></div>';const symbols=['🍥','🍃','🔥','🌙','🌀','🦊'];let seq=[],round=0,step=0,accept=false;const display=$('sealDisplay'),tiles=$('sealTiles');symbols.forEach(s=>{const b=document.createElement('button');b.className='tile';b.textContent=s;b.onclick=()=>{if(!accept)return;if(s===seq[step]){step++;b.classList.add('correct');if(step===seq.length){accept=false;round++;if(round===4)completeDay(2);else{display.textContent=`Seal ${round}/4 restored!`;setTimeout(showSequence,650)}}}else{accept=false;step=0;tiles.querySelectorAll('.tile').forEach(x=>x.classList.remove('correct'));display.textContent='The seal slipped! Deep breath and try again.';setTimeout(showSequence,750)}};tiles.appendChild(b)});function showSequence(){seq=Array.from({length:3+round},()=>symbols[Math.floor(Math.random()*symbols.length)]);step=0;accept=false;tiles.querySelectorAll('.tile').forEach(x=>x.classList.remove('correct'));display.textContent=seq.join(' ');setTimeout(()=>{display.textContent=`Round ${round+1}/4 · Repeat it`;accept=true},1200+seq.length*180)}$('beginSeal').onclick=showSequence}
+
+  function renderDay2(){
+
+  const area = $('gameArea');
+
+  // =========================================================
+  // DAY 2
+  // 4 GAMES
+  // 5 LEVELS EACH
+  // TOTAL = 20 LEVELS
+  // =========================================================
+
+  let day2Game = 1;
+  let day2Level = 1;
+
+
+  // =========================================================
+  // GAME 1
+  // NARUTO LOVE SEAL
+  // =========================================================
+
+  function renderNarutoGame(){
+
+    day2Game = 1;
+
+    area.innerHTML = `
+      <div class="subheading">
+        Naruto-inspired challenge · Rebuild the Love Seal
+      </div>
+
+      <p>
+        Four symbols flash in a secret order.
+        Memorise the order, then tap the tiles to rebuild the seal.
+        Complete 5 levels. Each level becomes harder.
+      </p>
+
+      <div class="center">
+
+        <div class="tiny-label">
+          NARUTO LOVE SEAL · LEVEL
+          <span id="narutoLevel">1</span> / 5
+        </div>
+
+      </div>
+
+      <div id="sealDisplay" class="sequence-display">
+        Ready, kunoichi? 🍥
+      </div>
+
+      <div id="sealTiles" class="tiles"></div>
+
+      <div class="center">
+        <button id="beginSeal" class="btn btn-primary">
+          Reveal the seal
+        </button>
+      </div>
+    `;
+
+
+    const symbols = [
+      '🍥',
+      '🍃',
+      '🔥',
+      '🌙',
+      '🌀',
+      '🦊'
+    ];
+
+    let sequence = [];
+    let round = 1;
+    let position = 0;
+    let accepting = false;
+
+    const display = $('sealDisplay');
+    const tiles = $('sealTiles');
+
+
+    // Create symbol buttons
+    symbols.forEach(symbol => {
+
+      const button = document.createElement('button');
+
+      button.className = 'tile';
+      button.textContent = symbol;
+
+      button.onclick = function(){
+
+        if(!accepting){
+          return;
+        }
+
+        if(symbol === sequence[position]){
+
+          position++;
+
+          button.classList.add('correct');
+
+          if(position === sequence.length){
+
+            accepting = false;
+
+            if(round === 5){
+
+              display.textContent =
+                '🍥 Love Seal completely restored! 🧡';
+
+              setFeedback(
+                'Naruto Love Seal complete! 🍥❤️'
+              );
+
+              setTimeout(function(){
+                renderLoveQuestions();
+              }, 1000);
+
+            }else{
+
+              round++;
+
+              $('narutoLevel').textContent = round;
+
+              display.textContent =
+                'Perfect! Level ' + (round - 1) + ' cleared! 🧡';
+
+              setTimeout(showNarutoSequence, 800);
+            }
+          }
+
+        }else{
+
+          accepting = false;
+          position = 0;
+
+          tiles
+            .querySelectorAll('.tile')
+            .forEach(function(tile){
+              tile.classList.remove('correct');
+            });
+
+          display.textContent =
+            'The seal slipped! Try again ❤️';
+
+          setTimeout(showNarutoSequence, 900);
+        }
+
+      };
+
+      tiles.appendChild(button);
+
+    });
+
+
+    function showNarutoSequence(){
+
+      // Level 1 = 3 symbols
+      // Level 2 = 4 symbols
+      // Level 3 = 5 symbols
+      // Level 4 = 6 symbols
+      // Level 5 = 7 symbols
+
+      const length = 2 + round;
+
+      sequence = [];
+
+      for(let i = 0; i < length; i++){
+
+        sequence.push(
+          symbols[Math.floor(Math.random() * symbols.length)]
+        );
+
+      }
+
+      position = 0;
+      accepting = false;
+
+      tiles
+        .querySelectorAll('.tile')
+        .forEach(function(tile){
+          tile.classList.remove('correct');
+        });
+
+      display.textContent = sequence.join(' ');
+
+      setTimeout(function(){
+
+        display.textContent =
+          'Level ' + round + '/5 · Repeat the seal';
+
+        accepting = true;
+
+      }, 1200 + sequence.length * 180);
+
+    }
+
+
+    $('beginSeal').onclick = showNarutoSequence;
+
+    showNarutoSequence();
+
+  }
+
+
+  // =========================================================
+  // GAME 2
+  // LOVE SILLY QUESTIONS
+  // =========================================================
+
+  function renderLoveQuestions(){
+
+    day2Game = 2;
+
+    const questions = [
+
+      {
+        question:
+          "If I suddenly text you 'I miss you' at midnight, what would you reply? 🌙❤️",
+
+        options: [
+          "Go to sleep 😂",
+          "I miss you too ❤️",
+          "Why are you awake? 😭",
+          "Seen 😌"
+        ],
+
+        answer: 1
+      },
+
+
+      {
+        question:
+          "If I steal one bite of your food, what should you do? 🍕😂",
+
+        options: [
+          "Fight me for it",
+          "Give me the whole plate ❤️",
+          "Hide the food",
+          "Order another one"
+        ],
+
+        answer: 1
+      },
+
+
+      {
+        question:
+          "If we get stuck in an elevator together for 3 hours, what happens? 😂",
+
+        options: [
+          "We become enemies",
+          "We take 500 selfies ❤️",
+          "We sleep",
+          "We call everyone"
+        ],
+
+        answer: 1
+      },
+
+
+      {
+        question:
+          "If I say 'I'm not hungry' while staring at your food, what does that mean? 👀",
+
+        options: [
+          "I'm actually full",
+          "I want your food 😂",
+          "I want water",
+          "I want to sleep"
+        ],
+
+        answer: 1
+      },
+
+
+      {
+        question:
+          "If our love story became a movie, what should the ending be? 🎬❤️",
+
+        options: [
+          "The End",
+          "To Be Continued",
+          "They lived happily ever after ❤️",
+          "Season 2 cancelled 😂"
+        ],
+
+        answer: 2
+      }
+
+    ];
+
+
+    let questionNumber = 0;
+
+
+    function drawQuestion(){
+
+      const q = questions[questionNumber];
+
+      area.innerHTML = `
+        <div class="subheading">
+          Game 2 of 4 · Love Silly Questions 😂❤️
+        </div>
+
+        <p>
+          There is only one answer that makes the love story
+          a little more perfect. Choose carefully! 😌
+        </p>
+
+        <div class="center">
+
+          <div class="tiny-label">
+            LOVE LEVEL
+            ${questionNumber + 1} / 5
+          </div>
+
+          <h2 id="loveQuestion">
+            ${q.question}
+          </h2>
+
+          <div id="loveOptions" class="tiles"></div>
+
+        </div>
+      `;
+
+
+      const optionsArea = $('loveOptions');
+
+
+      q.options.forEach(function(option, index){
+
+        const button = document.createElement('button');
+
+        button.className = 'tile';
+        button.textContent = option;
+
+
+        button.onclick = function(){
+
+          if(index === q.answer){
+
+            button.classList.add('correct');
+
+            setFeedback(
+              'Correct! 😂❤️ You know this love story!'
+            );
+
+
+            setTimeout(function(){
+
+              questionNumber++;
+
+              if(questionNumber >= questions.length){
+
+                setFeedback(
+                  'All 5 silly love questions completed! 💕'
+                );
+
+                setTimeout(function(){
+                  renderCoupleErrors();
+                }, 800);
+
+              }else{
+
+                drawQuestion();
+
+              }
+
+            }, 700);
+
+
+          }else{
+
+            button.classList.add('wrong');
+
+            setFeedback(
+              'Not quite! 😂 Try again, sweetheart.'
+            );
+
+            setTimeout(function(){
+              button.classList.remove('wrong');
+            }, 500);
+
+          }
+
+        };
+
+
+        optionsArea.appendChild(button);
+
+      });
+
+    }
+
+
+    drawQuestion();
+
+  }
+
+
+  // =========================================================
+  // GAME 3
+  // FIND THE COUPLE PICTURE ERROR
+  // =========================================================
+
+  function renderCoupleErrors(){
+
+    day2Game = 3;
+
+    const puzzles = [
+
+      {
+        left: '👩🏻 ❤️ 👨🏻',
+        right: '👩🏻 💔 👨🏻',
+
+        question: 'What changed?',
+
+        options: [
+          'The girl',
+          'The heart',
+          'The boy',
+          'Nothing'
+        ],
+
+        answer: 1
+      },
+
+
+      {
+        left: '🌙 👩🏻 🤝 👨🏻 ⭐',
+        right: '☀️ 👩🏻 🤝 👨🏻 ⭐',
+
+        question: 'Find the error!',
+
+        options: [
+          'The couple',
+          'The moon',
+          'The stars',
+          'The hands'
+        ],
+
+        answer: 1
+      },
+
+
+      {
+        left: '👩🏻 💐 👨🏻',
+        right: '👩🏻 🍕 👨🏻',
+
+        question: 'What is different?',
+
+        options: [
+          'The girl',
+          'The boy',
+          'The object between them',
+          'Nothing'
+        ],
+
+        answer: 2
+      },
+
+
+      {
+        left: '👩🏻 😊 ❤️ 👨🏻',
+        right: '👩🏻 😭 ❤️ 👨🏻',
+
+        question: 'Spot the tiny change!',
+
+        options: [
+          "The girl's expression",
+          'The heart',
+          "The boy's expression",
+          'The background'
+        ],
+
+        answer: 0
+      },
+
+
+      {
+        left: '🌸 👩🏻 ❤️ 👨🏻 🌸',
+        right: '🌸 👩🏻 ❤️ 👨🏻 🌻',
+
+        question: 'Which flower is different?',
+
+        options: [
+          'Left flower',
+          'The heart',
+          'Right flower',
+          'Both flowers'
+        ],
+
+        answer: 2
+      }
+
+    ];
+
+
+    let puzzleNumber = 0;
+
+
+    function drawPuzzle(){
+
+      const puzzle = puzzles[puzzleNumber];
+
+
+      area.innerHTML = `
+        <div class="subheading">
+          Game 3 of 4 · Find the Couple Picture Error 🔍❤️
+        </div>
+
+        <p>
+          Look carefully at both pictures.
+          One small thing has changed.
+          Can you find it?
+        </p>
+
+        <div class="center">
+
+          <div class="tiny-label">
+            ERROR FINDING LEVEL
+            ${puzzleNumber + 1} / 5
+          </div>
+
+          <div style="
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:15px;
+            width:100%;
+            max-width:650px;
+            margin:20px auto;
+          ">
+
+            <div style="
+              min-height:130px;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              border-radius:20px;
+              background:rgba(255,255,255,.08);
+              border:1px solid rgba(255,255,255,.15);
+              font-size:42px;
+              padding:20px;
+              box-sizing:border-box;
+            ">
+              ${puzzle.left}
+            </div>
+
+            <div style="
+              min-height:130px;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              border-radius:20px;
+              background:rgba(255,255,255,.08);
+              border:1px solid rgba(255,255,255,.15);
+              font-size:42px;
+              padding:20px;
+              box-sizing:border-box;
+            ">
+              ${puzzle.right}
+            </div>
+
+          </div>
+
+          <h2>
+            ${puzzle.question}
+          </h2>
+
+          <div id="errorOptions" class="tiles"></div>
+
+        </div>
+      `;
+
+
+      const optionsArea = $('errorOptions');
+
+
+      puzzle.options.forEach(function(option, index){
+
+        const button = document.createElement('button');
+
+        button.className = 'tile';
+        button.textContent = option;
+
+
+        button.onclick = function(){
+
+          if(index === puzzle.answer){
+
+            button.classList.add('correct');
+
+            setFeedback(
+              'Excellent eyes! 🔍❤️ You found the difference!'
+            );
+
+
+            setTimeout(function(){
+
+              puzzleNumber++;
+
+              if(puzzleNumber >= puzzles.length){
+
+                setFeedback(
+                  'All 5 couple picture mysteries solved! 💕'
+                );
+
+                setTimeout(function(){
+                  renderLoveQuotes();
+                }, 800);
+
+              }else{
+
+                drawPuzzle();
+
+              }
+
+            }, 700);
+
+
+          }else{
+
+            button.classList.add('wrong');
+
+            setFeedback(
+              'Look carefully again 👀 Something changed!'
+            );
+
+            setTimeout(function(){
+              button.classList.remove('wrong');
+            }, 500);
+
+          }
+
+        };
+
+
+        optionsArea.appendChild(button);
+
+      });
+
+    }
+
+
+    drawPuzzle();
+
+  }
+
+
+  // =========================================================
+  // GAME 4
+  // LOVE QUOTES
+  // =========================================================
+
+  function renderLoveQuotes(){
+
+    day2Game = 4;
+
+    const quotes = [
+
+      {
+        title: 'Level 1 · A Little Reminder 🌸',
+
+        text:
+          'You do not have to be perfect to be loved. Being yourself is already one of my favourite things about you.'
+      },
+
+
+      {
+        title: 'Level 2 · Your Smile 😊',
+
+        text:
+          'If I could keep one sound forever, I would choose your laugh. Somehow it makes even an ordinary day feel special.'
+      },
+
+
+      {
+        title: 'Level 3 · From My Heart ❤️',
+
+        text:
+          'I may not always have the perfect words, but my heart keeps choosing you in every language it knows.'
+      },
+
+
+      {
+        title: 'Level 4 · A Little Forever 🌙',
+
+        text:
+          'Among all the beautiful moments life could give me, I would still choose the moments where I get to see you smile.'
+      },
+
+
+      {
+        title: 'Level 5 · My Final Note 💌',
+
+        text:
+          'You are not just a chapter in my story. You are the reason I want to keep writing the story, page after page, day after day.'
+      }
+
+    ];
+
+
+    let quoteNumber = 0;
+
+
+    function drawQuote(){
+
+      const quote = quotes[quoteNumber];
+
+
+      area.innerHTML = `
+        <div class="subheading">
+          Game 4 of 4 · Make Her Heart Smile 💌
+        </div>
+
+        <p>
+          Take a moment and read this little message.
+          This level is about making your heart smile. ❤️
+        </p>
+
+        <div class="center">
+
+          <div class="tiny-label">
+            LOVE NOTE
+            ${quoteNumber + 1} / 5
+          </div>
+
+          <div style="
+            max-width:650px;
+            margin:25px auto;
+            padding:30px 25px;
+            border-radius:25px;
+            background:rgba(255,255,255,.08);
+            border:1px solid rgba(255,255,255,.15);
+            box-shadow:0 15px 45px rgba(0,0,0,.15);
+          ">
+
+            <h2>
+              ${quote.title}
+            </h2>
+
+            <p style="
+              font-size:1.15rem;
+              line-height:1.8;
+              margin-top:20px;
+            ">
+              “${quote.text}”
+            </p>
+
+            <div style="
+              font-size:2rem;
+              margin-top:20px;
+            ">
+              🧡 💕 🌸
+            </div>
+
+          </div>
+
+          <button
+            id="smileButton"
+            class="btn btn-primary"
+          >
+            💕 This made my heart smile
+          </button>
+
+        </div>
+      `;
+
+
+      $('smileButton').onclick = function(){
+
+        this.disabled = true;
+
+        setFeedback(
+          'A little love sent directly to your heart. 💕'
+        );
+
+
+        setTimeout(function(){
+
+          quoteNumber++;
+
+
+          if(quoteNumber >= quotes.length){
+
+            // ============================================
+            // ALL DAY 2 GAMES COMPLETED
+            // ============================================
+
+            area.innerHTML = `
+              <div class="center">
+
+                <div class="subheading">
+                  DAY 2 COMPLETE 💕
+                </div>
+
+                <h2>
+                  You completed all 20 love levels! 🍥❤️
+                </h2>
+
+                <p>
+                  Naruto Love Seal ✔️<br>
+                  Silly Love Questions ✔️<br>
+                  Couple Detective ✔️<br>
+                  Love Notes ✔️
+                </p>
+
+                <div style="
+                  font-size:3rem;
+                  margin:25px 0;
+                ">
+                  🍥 😂 🔍 💌 🧡
+                </div>
+
+                <p>
+                  Your first hidden picture piece has been unlocked.
+                </p>
+
+              </div>
+            `;
+
+
+            // Complete Day 2 ONLY here
+            completeDay(2);
+
+
+          }else{
+
+            drawQuote();
+
+          }
+
+        }, 900);
+
+      };
+
+    }
+
+
+    drawQuote();
+
+  }
+
+
+  // =========================================================
+  // START DAY 2
+  // =========================================================
+
+  renderNarutoGame();
+
+}
   function renderDay3(){const area=$('gameArea');area.innerHTML='<div class="subheading">Very hard · Find the way back to my heart</div><p>Guide the little orange heart through the maze to the flower. Dark squares are walls. Use the direction controls, plan ahead, and find the path. You can undo a move; the maze resets only when you choose.</p><div class="center"><b>Moves: <span id="moveCount">0</span></b></div><div id="mazeBoard" class="board"></div><div class="tiles" style="grid-template-columns:repeat(3,1fr);max-width:230px"><button class="tile" data-move="up">↑</button><button class="tile" data-move="left">←</button><button class="tile" data-move="right">→</button><button class="tile" data-move="down">↓</button><button class="tile" id="undoMove">↶ Undo</button><button class="tile" id="resetMaze">↻ Reset</button></div>';const walls=new Set([3,5,8,11,13,16,18,21]);const W=5,start=0,goal=24;let pos=start,visited=[start],history=[];function draw(){const board=$('mazeBoard');board.innerHTML='';for(let i=0;i<25;i++){const b=document.createElement('button');b.textContent=i===pos?'🧡':i===goal?'🌸':walls.has(i)?'':visited.includes(i)?'·':'';if(walls.has(i))b.classList.add('wall');if(i===pos)b.classList.add('player');if(i===goal)b.classList.add('goal');if(visited.includes(i))b.classList.add('visited');board.appendChild(b)}$('moveCount').textContent=history.length}function move(dir){const r=Math.floor(pos/W),c=pos%W;let nr=r,nc=c;if(dir==='up')nr--;if(dir==='down')nr++;if(dir==='left')nc--;if(dir==='right')nc++;if(nr<0||nr>=W||nc<0||nc>=W)return;const n=nr*W+nc;if(walls.has(n)){setFeedback('Bonk! A wall. Try another route, maze master.');return}history.push(pos);pos=n;visited.push(pos);draw();if(pos===goal){completeDay(3);setFeedback(`Heart found in ${history.length} moves. Every route leads back to you. 🧡`)}}area.querySelectorAll('[data-move]').forEach(b=>b.onclick=()=>move(b.dataset.move));$('undoMove').onclick=()=>{if(history.length){pos=history.pop();visited.push(pos);draw()}};$('resetMaze').onclick=()=>{pos=start;visited=[start];history=[];draw();setFeedback('Maze reset. A new route, same destination.')};window.addEventListener('keydown',function key(e){if(currentDay!==3)return;const map={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right'};if(map[e.key]){e.preventDefault();move(map[e.key])}});draw()}
   function renderDay4(){const area=$('gameArea');area.innerHTML='<div class="subheading">Difficult · The Secret Love Cipher</div><p>Decode four messages to unlock “YOU”. Each code uses A=1, B=2, … Z=26. Numbers are separated by hyphens. Solve one, then the next message gets trickier. Type the answer, not a multiple-choice guess.</p><div class="center"><div class="tiny-label">MESSAGE <span id="cipherRound">1</span> / 4</div><h2 id="cipherCode" style="letter-spacing:.12em"></h2><p id="cipherClue" class="muted"></p><div class="input-row"><input id="cipherInput" class="text-input" autocomplete="off" placeholder="Type the decoded word"><button id="cipherSubmit" class="btn btn-primary">Decode</button></div></div>';const qs=[{code:'25-15-21',answer:'YOU',clue:'The person this whole website is for.'},{code:'13-25',answer:'MY',clue:'A tiny word that makes “favourite person” sound personal.'},{code:'19-21-14-19-8-9-14-5',answer:'SUNSHINE',clue:'Someone who brightens your day.'},{code:'6-15-18-5-22-5-18',answer:'FOREVER',clue:'How long this little website hopes to make you smile.'}];let r=0;function draw(){if(r>=qs.length){completeDay(4);return}const q=qs[r];$('cipherRound').textContent=r+1;$('cipherCode').textContent=q.code;$('cipherClue').textContent=q.clue;$('cipherInput').value='';$('cipherInput').focus()}function check(){if($('cipherInput').value.trim().toUpperCase()===qs[r].answer){r++;setFeedback('Decoded! 🧡');draw()}else setFeedback('Not yet, detective. Convert each number into its alphabet letter and try again.')} $('cipherSubmit').onclick=check;$('cipherInput').onkeydown=e=>{if(e.key==='Enter')check()};draw()}
   function shootArrow(){if(state.birthdayHits>=10)return;state.birthdayHits++;const h=$('targetHeart');h.classList.remove('hit');void h.offsetWidth;h.classList.add('hit');$('hitCount').textContent=state.birthdayHits;$('heartMeterFill').style.width=(state.birthdayHits*10)+'%';const msgs=['A tiny arrow of affection!','Cupid is taking notes.','That heart is getting softer.','Bullseye, sweetheart!','A direct hit from your love.','Six arrows, six reasons to smile.','That heart knows who it belongs to.','Nearly there, birthday girl!','One more little love tap.','All broken open… and full of love! 🧡'];$('arrowMessage').textContent=msgs[state.birthdayHits-1];if(state.birthdayHits>=10){state.birthdayDone=true;state.completed=[true,true,true,true,true];state.revealed=[true,true,true,true];saveState();renderBirthday();renderJourney();renderPhotoGrid();toast('🧡 5/5 streak complete — happy birthday, my love!')}else saveState()}
