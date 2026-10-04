@@ -33,44 +33,67 @@
   function renderPage(){const sch=schedule(),now=new Date();currentDay=determineDay();for(let i=0;i<4;i++){if(now>=sch[i].end)state.completed[i]=true}if(currentDay===5)state.completed=[true,true,true,true,true];saveState();document.body.dataset.day=currentDay;const idx=currentDay-1;$('dayName').textContent=`Day ${currentDay} of 5`;const dayStart=sch[idx].start;$('dayDate').textContent=currentDay===1?`Started ${formatDate(new Date(state.firstOpened))}`:`Opens ${formatDate(dayStart)}`;$('progressFill').style.width=(state.completed.filter(Boolean).length/5*100)+'%';$('streakLine').textContent=`${'🧡 '.repeat(state.completed.filter(Boolean).length)}${state.completed.filter(Boolean).length} / 5 days collected`;$('heroTitle').innerHTML=currentDay===5?'Happy birthday,<br><em>my favourite.</em>':currentDay===1?'Five days.<br><em>One forever.</em>':`Day ${currentDay}.<br><em>Closer to us.</em>`;$('heroSubtitle').textContent=currentDay===5?'Today, the whole little universe is celebrating you.':'Every puzzle brings you closer to a little piece of us.';
     const active=now>=sch[idx].start&&now<sch[idx].end;show('notReady',!active);show('gamePanel',active&&currentDay<5);show('birthdayPanel',currentDay===5);show('revealPanel',currentDay>=2&&currentDay<=4);if(!active&&currentDay<5){$('notReadyText').textContent=`Your next chapter opens ${formatDate(sch[idx].start)}. Until then, your orange-heart collection is safe.`}if(currentDay<5){$('gameKicker').textContent=['DAY ONE • THREE MINI-GAMES','DAY TWO • HIDDEN LEAF MISSION','DAY THREE • VERY TRICKY MAZE','DAY FOUR • LOVE CODE'][idx];$('gameTitle').textContent=dayTitles[idx];$('gameDescription').textContent=dayDescriptions[idx];$('difficulty').textContent=['EASY + PLAYFUL','HARD • MEMORY','VERY HARD • MAZE','DIFFICULT • CIPHER'][idx];$('revealTitle').textContent=['','Your first hidden piece: I','The next piece spells LOVE','The third piece says YOU'][idx];$('revealCopy').textContent=state.revealed[idx-1]?'You earned this piece by solving today’s adventure. 🧡':'Finish today’s game to reveal this piece of our picture.';if(active&&activeGame===0&&!game.initialized)startGameForDay(currentDay);renderPhotoGrid()}else{renderBirthday()}}
   function renderJourney(){const sch=schedule(),now=new Date(),list=$('journeyList');list.innerHTML='';for(let i=0;i<5;i++){const day=i+1, passed=now>=sch[i].end, earned=state.completed[i]||passed;const div=document.createElement('div');div.className='journey-item';const label=day===5?'Birthday surprise':day===1?'Three mini-games':day===2?'Naruto-inspired memory seal':day===3?'Heart-finding maze':'Secret love cipher';const status=state.completed[i]?'🧡 Collected':passed?'🧡 Day complete':now>=sch[i].start?'♡ In progress':'🔒 Waiting';div.innerHTML=`<span class="journey-emoji">${earned?'🧡':['✨','🍥','🧩','🔐','🎂'][i]}</span><div><strong>Day ${day} · ${label}</strong><small>${formatDate(sch[i].start)}</small></div><span class="journey-status">${status}</span>`;list.appendChild(div)}}
-  function renderPhotoGrid(){
+  function renderPhotoGrid() {
   const grid = $('photoGrid');
   if (!grid) return;
 
   grid.innerHTML = '';
+
   const labels = ['I', 'LOVE', 'YOU', '🧡'];
 
+  // Day 1 = 0 pieces
+  // Day 2 = 1 piece
+  // Day 3 = 2 pieces
+  // Day 4 = 3 pieces
+  // Day 5 = 4 pieces
+  const piecesToReveal = Math.max(0, Math.min(4, currentDay - 1));
+
   for (let i = 0; i < 4; i++) {
+
     const p = document.createElement('div');
-    p.className = 'photo-part' + (state.revealed[i] ? ' revealed' : '');
+    p.className = 'photo-part';
+
+    // Reveal the correct piece according to the day
+    if (i < piecesToReveal) {
+      p.classList.add('revealed');
+    }
 
     const im = document.createElement('img');
+
     im.src = PHOTO;
     im.alt = 'Our photo';
-    im.onerror = () => {
-      im.style.display = 'none';
-      $('photoHelp').classList.remove('hidden');
-    };
-    im.onload = () => {
-      $('photoHelp').classList.add('hidden');
-    };
+    im.className = 'photo-piece-image';
 
     p.appendChild(im);
 
-    const word = document.createElement('span');
-    word.className = 'overlay-word';
-    word.textContent = labels[i];
-    p.appendChild(word);
+    // Cover for unrevealed pieces
+    if (i >= piecesToReveal) {
+      const cover = document.createElement('div');
+      cover.className = 'piece-cover';
 
-    if (i === 3 && !state.revealed[i]) {
-      p.classList.add('birthday-piece');
+      const word = document.createElement('span');
+      word.className = 'overlay-word';
+      word.textContent = labels[i];
+
+      cover.appendChild(word);
+      p.appendChild(cover);
     }
 
-    grid.appendChild(p);
-  }
+    im.onerror = () => {
+      const help = $('photoHelp');
+      if (help) {
+        help.classList.remove('hidden');
+      }
+    };
 
-  if (currentDay === 5 && state.birthdayDone) {
-    state.revealed = [true, true, true, true];
+    im.onload = () => {
+      const help = $('photoHelp');
+      if (help) {
+        help.classList.add('hidden');
+      }
+    };
+
+    grid.appendChild(p);
   }
 }
   function renderBirthday(){const allDone=state.birthdayDone;show('birthdayReveal',allDone);$('hitCount').textContent=state.birthdayHits;$('heartMeterFill').style.width=(state.birthdayHits*10)+'%';$('targetHeart').textContent=state.birthdayHits>=10?'💖':state.birthdayHits>=7?'💔':state.birthdayHits>=4?'❤️‍🔥':'❤️';$('targetHeart').classList.toggle('broken',state.birthdayHits>=10);$('shootBtn').disabled=state.birthdayHits>=10;$('shootBtn').textContent=state.birthdayHits>=10?'Heart opened 🧡':'🏹 Shoot an arrow';if(allDone){$('arrowMessage').textContent='You did it! Every piece of our picture belongs together.';const f=$('fullPhoto');f.innerHTML='';const img=document.createElement('img');img.src=PHOTO;img.alt='Our complete photo';img.onerror=()=>{f.innerHTML='<div class="photo-grid" id="birthdayPhotoGrid"></div>';const pg=f.firstChild;for(let i=0;i<4;i++){const x=document.createElement('div');x.className='photo-part revealed';const im=document.createElement('img');im.src=PHOTO;im.alt='';x.appendChild(im);pg.appendChild(x)}};f.appendChild(img);renderPhotoGrid();$('progressFill').style.width='100%';$('streakLine').textContent='🧡 🧡 🧡 🧡 🧡 5 / 5 days collected';}}
