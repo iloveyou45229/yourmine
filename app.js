@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const KEY='iwby_love_journey_v1';
-  const PHOTO='assets/love-photo.jpg';
+  const PHOTO='assets/love-photo.jpeg';
   const VIDEO_ID='1Q-qrqIuYThWRB8X0amy8Wfe1PgTMf02S';
   const $=id=>document.getElementById(id);
   const dayTitles=['The Tiny Brain Spark','Hidden Leaf, Hidden Heart','The Constellation of Us','Crack the Love Code','Your Birthday, My Favourite Day'];
