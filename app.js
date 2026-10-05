@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const KEY='iwby_love_journey_v1';
-  const PHOTO='assets/love-photo.jpeg';
+  const PHOTO='assets/love-photo.png';
   const VIDEO_ID='15NRKuBlotHagNvt7F_-Y6IX6bKtJsg4z';
 
   
