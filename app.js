@@ -107,7 +107,8 @@
   function finishMini(message){game.score++;setFeedback(message);if(game.score>=3){completeDay(1);$('gameDescription').textContent='All three mini-games cleared! Play again or pick a new mini-game below.';const b=document.createElement('button');b.className='btn btn-primary';b.textContent='Play the mini-games again';b.onclick=()=>{game.score=0;game.mini=0;newGame()};$('gameArea').appendChild(b)}else{game.mini++;setTimeout(()=>renderDay1(),650)}}
   function renderDay1(){const area=$('gameArea');area.innerHTML='';if(game.mini===0){area.innerHTML='<div class="subheading">Mini-game 1 of 3 · Memory Spark</div><p>Watch the four-heart sequence, then tap the matching symbols in the same order. Three rounds to pass.</p><div id="sequenceDisplay" class="sequence-display">Ready? 🧡</div><div class="tiles" id="memoryTiles"></div><div class="center"><button class="btn btn-secondary" id="showSequence">Show sequence</button></div>';const symbols=['🧡','🌙','🌸','⭐'];let seq=[];let round=0;const display=$('sequenceDisplay'),tiles=$('memoryTiles');symbols.forEach(s=>{const b=document.createElement('button');b.className='tile';b.textContent=s;b.onclick=()=>{if(!game.accepting)return;const v=seq[game.step];if(s===v){game.step++;b.classList.add('correct');if(game.step===seq.length){game.accepting=false;round++;if(round>=3)finishMini('Memory Spark cleared! 🧠');else{display.textContent=`Perfect! Round ${round}/3`;setTimeout(next,500)}}}else{display.textContent='Oops! Try that round again 💕';game.step=0;tiles.querySelectorAll('.tile').forEach(x=>x.classList.remove('correct'))}};tiles.appendChild(b)});function next(){seq=Array.from({length:3+round},()=>symbols[Math.floor(Math.random()*symbols.length)]);game.step=0;game.accepting=false;display.textContent=seq.join('  ');setTimeout(()=>{display.textContent='Now repeat it!';game.accepting=true;tiles.querySelectorAll('.tile').forEach(x=>x.classList.remove('correct'))},900)}$('showSequence').onclick=next;next()}else if(game.mini===1){area.innerHTML='<div class="subheading">Mini-game 2 of 3 · Pattern Picnic</div><p>Find the missing number. Tap the answer tile, then solve two more patterns. No MCQs: just tap the number that completes the pattern.</p><h2 class="center" id="patternQuestion"></h2><div class="tiles" id="patternTiles"></div>';const qs=[{q:'2, 4, 8, 16, __',a:32,opts:[24,30,32,36]},{q:'1, 4, 9, 16, __',a:25,opts:[20,24,25,36]},{q:'3, 6, 11, 18, __',a:27,opts:[25,26,27,29]}];let r=0;function draw(){if(r>=qs.length){finishMini('Pattern Picnic complete! Your brain has excellent taste.');return}const q=qs[r];$('patternQuestion').textContent=q.q;$('patternTiles').innerHTML='';q.opts.sort(()=>Math.random()-.5).forEach(n=>{const b=document.createElement('button');b.className='tile';b.textContent=n;b.onclick=()=>{if(n===q.a){r++;draw()}else{b.classList.add('wrong');setFeedback('Not quite, sweetheart. Look at how the numbers grow, then try again!')}};$('patternTiles').appendChild(b)})}draw()}else{area.innerHTML='<div class="subheading">Mini-game 3 of 3 · Build a Love Note</div><p>Tap the words to arrange this scrambled note into a sentence. Tap a placed word to send it back.</p><div id="wordSlots" class="word-slots"></div><div id="wordBank" class="word-bank"></div><div class="center"><button id="checkWords" class="btn btn-primary">Check our little note</button></div>';const words=['you','make','my','ordinary','days','feel','magical'];let order=words.map((w,i)=>({w,i})).sort(()=>Math.random()-.5),chosen=[];const slots=$('wordSlots'),bank=$('wordBank');function draw(){slots.innerHTML='';bank.innerHTML='';chosen.forEach((o,i)=>{const b=document.createElement('button');b.className='slot';b.textContent=o.w;b.onclick=()=>{order.push(o);chosen.splice(i,1);draw()};slots.appendChild(b)});order.forEach(o=>{const b=document.createElement('button');b.className='word-chip';b.textContent=o.w;b.onclick=()=>{chosen.push(o);order=order.filter(x=>x.i!==o.i);draw()};bank.appendChild(b)})}draw();$('checkWords').onclick=()=>{if(chosen.map(x=>x.w).join(' ')==='you make my ordinary days feel magical'){finishMini('Love note assembled perfectly. You make my ordinary days feel magical. 🧡')}else setFeedback('Almost! Rearrange the words into a sentence that makes your heart smile.') }}}
   
-function renderDay2(){
+
+  function renderDay2(){
 
   const area = $('gameArea');
 
@@ -888,48 +889,19 @@ function renderDay2(){
 
           if(quoteNumber >= quotes.length){
 
-            // ============================================
-            // ALL DAY 2 GAMES COMPLETED
-            // ============================================
+            
 
-            area.innerHTML = `
-              <div class="center">
+            setFeedback(
+    '💌 Love Notes complete! One final puzzle remains... 🧩❤️'
+  );
 
-                <div class="subheading">
-                  DAY 2 COMPLETE 💕
-                </div>
+  setTimeout(function(){
 
-                <h2>
-                  You completed all 20 love levels! 🍥❤️
-                </h2>
+    renderJigsawGame();
 
-                <p>
-                  Naruto Love Seal ✔️<br>
-                  Silly Love Questions ✔️<br>
-                  Couple Detective ✔️<br>
-                  Love Notes ✔️
-                </p>
+  }, 900);
 
-                <div style="
-                  font-size:3rem;
-                  margin:25px 0;
-                ">
-                  🍥 😂 🔍 💌 🧡
-                </div>
-
-                <p>
-                  Your first hidden picture piece has been unlocked.
-                </p>
-
-              </div>
-            `;
-
-
-            // Complete Day 2 ONLY here
-            completeDay(2);
-
-
-          }else{
+}else{
 
             drawQuote();
 
@@ -945,6 +917,442 @@ function renderDay2(){
     drawQuote();
 
   }
+  // =========================================================
+// GAME 5
+// 4x4 JIGSAW LOVE PUZZLE 🧩❤️
+// =========================================================
+
+function renderJigsawGame(){
+
+  day2Game = 5;
+
+  const JIGSAW_IMAGE = 'assets/love-photo1.jpeg';
+
+  const SIZE = 4;
+  const TOTAL = SIZE * SIZE;
+
+  let pieces = [];
+  let moves = 0;
+  let solved = false;
+
+  // ---------------------------------------------------------
+  // GAME HTML
+  // ---------------------------------------------------------
+
+  area.innerHTML = `
+
+    <div class="subheading">
+      Game 5 of 5 · Our Picture Jigsaw 🧩❤️
+    </div>
+
+    <p>
+      One picture. Sixteen pieces.
+      Put everything back together to reveal our special memory. 💕
+    </p>
+
+    <div class="center">
+
+      <div class="tiny-label">
+        JIGSAW LEVEL · 4 × 4
+      </div>
+
+      <p>
+        Move the pieces until the picture is complete.
+      </p>
+
+      <div
+        id="jigsawBoard"
+        style="
+          width:min(90vw,520px);
+          aspect-ratio:1;
+          margin:25px auto;
+          display:grid;
+          grid-template-columns:repeat(4,1fr);
+          grid-template-rows:repeat(4,1fr);
+          gap:3px;
+          padding:5px;
+          box-sizing:border-box;
+          background:rgba(255,255,255,.12);
+          border-radius:20px;
+          border:1px solid rgba(255,255,255,.2);
+          box-shadow:0 15px 45px rgba(0,0,0,.25);
+        ">
+      </div>
+
+      <div style="
+        display:flex;
+        justify-content:center;
+        gap:20px;
+        flex-wrap:wrap;
+        margin:15px 0;
+        font-weight:bold;
+      ">
+
+        <div>
+          🧩 Moves:
+          <span id="jigsawMoves">0</span>
+        </div>
+
+      </div>
+
+      <button
+        id="shuffleJigsaw"
+        class="btn btn-secondary">
+        🔀 Shuffle Puzzle
+      </button>
+
+      <button
+        id="solveJigsaw"
+        class="btn btn-secondary">
+        🖼️ Show Picture
+      </button>
+
+    </div>
+  `;
+
+
+  const board = $('jigsawBoard');
+
+
+  // ---------------------------------------------------------
+  // CREATE PIECES
+  // ---------------------------------------------------------
+
+  function createPieces(){
+
+    pieces = [];
+
+    for(let i = 0; i < TOTAL; i++){
+
+      pieces.push({
+        id:i,
+        position:i
+      });
+
+    }
+
+  }
+
+
+  // ---------------------------------------------------------
+  // SHUFFLE
+  // ---------------------------------------------------------
+
+  function shufflePieces(){
+
+    // Fisher-Yates shuffle
+
+    for(let i = pieces.length - 1; i > 0; i--){
+
+      const j =
+        Math.floor(Math.random() * (i + 1));
+
+      [pieces[i], pieces[j]] =
+        [pieces[j], pieces[i]];
+
+    }
+
+    // Make sure puzzle isn't accidentally solved
+
+    if(isSolved()){
+
+      [pieces[0], pieces[1]] =
+        [pieces[1], pieces[0]];
+
+    }
+
+  }
+
+
+  // ---------------------------------------------------------
+  // DRAW PUZZLE
+  // ---------------------------------------------------------
+
+  function drawPuzzle(){
+
+    board.innerHTML = '';
+
+    pieces.forEach(function(piece, index){
+
+      const tile =
+        document.createElement('button');
+
+      tile.className = 'jigsaw-piece';
+
+      tile.dataset.index = index;
+
+      tile.dataset.id = piece.id;
+
+
+      // -----------------------------------------------------
+      // IMAGE POSITION
+      // -----------------------------------------------------
+
+      const row =
+        Math.floor(piece.id / SIZE);
+
+      const col =
+        piece.id % SIZE;
+
+
+      tile.style.backgroundImage =
+        `url("${JIGSAW_IMAGE}")`;
+
+      tile.style.backgroundSize =
+        `${SIZE * 100}% ${SIZE * 100}%`;
+
+      tile.style.backgroundPosition =
+        `${(col / (SIZE - 1)) * 100}% ${(row / (SIZE - 1)) * 100}%`;
+
+
+      tile.style.width = '100%';
+      tile.style.height = '100%';
+
+      tile.style.border = 'none';
+      tile.style.padding = '0';
+      tile.style.margin = '0';
+
+      tile.style.cursor = 'pointer';
+
+      tile.style.backgroundRepeat = 'no-repeat';
+
+      tile.style.borderRadius = '5px';
+
+      tile.style.boxSizing = 'border-box';
+
+      tile.style.transition =
+        'transform .15s ease, filter .15s ease';
+
+
+      // -----------------------------------------------------
+      // CLICK TO SWAP
+      // -----------------------------------------------------
+
+      tile.onclick = function(){
+
+        if(solved) return;
+
+        const selected =
+          board.querySelector('.jigsaw-selected');
+
+
+        // First piece selected
+
+        if(!selected){
+
+          tile.classList.add('jigsaw-selected');
+
+          tile.style.transform =
+            'scale(.94)';
+
+          tile.style.filter =
+            'brightness(1.25)';
+
+          return;
+
+        }
+
+
+        // Clicking same piece again
+
+        if(selected === tile){
+
+          tile.classList.remove(
+            'jigsaw-selected'
+          );
+
+          tile.style.transform =
+            'scale(1)';
+
+          tile.style.filter =
+            'brightness(1)';
+
+          return;
+
+        }
+
+
+        // Find indexes
+
+        const firstIndex =
+          Number(selected.dataset.index);
+
+        const secondIndex =
+          Number(tile.dataset.index);
+
+
+        // Swap pieces
+
+        [
+          pieces[firstIndex],
+          pieces[secondIndex]
+        ] = [
+          pieces[secondIndex],
+          pieces[firstIndex]
+        ];
+
+
+        moves++;
+
+        $('jigsawMoves').textContent =
+          moves;
+
+
+        drawPuzzle();
+
+
+        // Check solution
+
+        if(isSolved()){
+
+          finishJigsaw();
+
+        }
+
+      };
+
+      board.appendChild(tile);
+
+    });
+
+  }
+
+
+  // ---------------------------------------------------------
+  // CHECK SOLUTION
+  // ---------------------------------------------------------
+
+  function isSolved(){
+
+    for(let i = 0; i < TOTAL; i++){
+
+      if(pieces[i].id !== i){
+
+        return false;
+
+      }
+
+    }
+
+    return true;
+
+  }
+
+
+  // ---------------------------------------------------------
+  // FINISH JIGSAW
+  // ---------------------------------------------------------
+
+  function finishJigsaw(){
+
+    solved = true;
+
+    drawPuzzle();
+
+    setFeedback(
+      '🧩❤️ Picture complete! You put our memory back together!'
+    );
+
+
+    area.innerHTML += `
+
+      <div
+        style="
+          max-width:600px;
+          margin:25px auto;
+          padding:25px;
+          border-radius:25px;
+          text-align:center;
+          background:rgba(255,255,255,.1);
+          border:1px solid rgba(255,255,255,.2);
+        "
+      >
+
+        <div style="font-size:3rem;">
+          🧩 💕 🧡
+        </div>
+
+        <h2>
+          You completed the picture!
+        </h2>
+
+        <p>
+          All 16 pieces are back in their places.
+          You solved the final Day 2 puzzle! ❤️
+        </p>
+
+        <p>
+          Moves used:
+          <strong>${moves}</strong>
+        </p>
+
+        <button
+          id="completeDay2"
+          class="btn btn-primary"
+        >
+          🧡 Complete Day 2
+        </button>
+
+      </div>
+
+    `;
+
+
+    $('completeDay2').onclick =
+      function(){
+
+        completeDay(2);
+
+      };
+
+  }
+
+
+  // ---------------------------------------------------------
+  // SHUFFLE BUTTON
+  // ---------------------------------------------------------
+
+  $('shuffleJigsaw').onclick =
+    function(){
+
+      if(solved) return;
+
+      moves = 0;
+
+      $('jigsawMoves').textContent =
+        '0';
+
+      createPieces();
+
+      shufflePieces();
+
+      drawPuzzle();
+
+      setFeedback(
+        '🔀 The puzzle has been shuffled! Good luck, sweetheart. ❤️'
+      );
+
+    };
+
+
+  // ---------------------------------------------------------
+  // SHOW COMPLETE PICTURE
+  // ---------------------------------------------------------
+
+  
+
+
+  // ---------------------------------------------------------
+  // START PUZZLE
+  // ---------------------------------------------------------
+
+  createPieces();
+
+  shufflePieces();
+
+  drawPuzzle();
+
+}
 
 
   // =========================================================
@@ -954,6 +1362,7 @@ function renderDay2(){
   renderNarutoGame();
 
 }
+
 
 function renderDay3(){
 
