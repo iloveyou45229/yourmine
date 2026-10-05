@@ -4020,6 +4020,881 @@ function renderDay4() {
   ============================================================
   */
 
+ function renderDay4() {
+
+  const area = $('gameArea');
+
+  let currentGame = 1;
+
+  /*
+  ============================================================
+  GAME 1 - SECRET LOVE CIPHER
+  ============================================================
+  */
+
+  function game1() {
+
+    currentGame = 1;
+
+    area.innerHTML = `
+      <div class="subheading">
+        Difficult · Game 1 of 6 · The Secret Love Cipher 🔐
+      </div>
+
+      <p>
+        Decode four messages to unlock “YOU”.
+        Each code uses A=1, B=2, … Z=26.
+        Numbers are separated by hyphens.
+        Solve one, then the next message gets trickier.
+        Type the answer, not a multiple-choice guess.
+      </p>
+
+      <div class="center">
+
+        <div class="tiny-label">
+          MESSAGE <span id="cipherRound">1</span> / 4
+        </div>
+
+        <h2 id="cipherCode"
+            style="letter-spacing:.12em;">
+        </h2>
+
+        <p id="cipherClue" class="muted"></p>
+
+        <div class="input-row">
+
+          <input
+            id="cipherInput"
+            class="text-input"
+            autocomplete="off"
+            placeholder="Type the decoded word"
+          >
+
+          <button
+            id="cipherSubmit"
+            class="btn btn-primary">
+            Decode
+          </button>
+
+        </div>
+
+      </div>
+    `;
+
+    const qs = [
+      {
+        code: '25-15-21',
+        answer: 'YOU',
+        clue: 'The person this whole website is for.'
+      },
+      {
+        code: '13-25',
+        answer: 'MY',
+        clue: 'A tiny word that makes “favourite person” sound personal.'
+      },
+      {
+        code: '19-21-14-19-8-9-14-5',
+        answer: 'SUNSHINE',
+        clue: 'Someone who brightens your day.'
+      },
+      {
+        code: '6-15-18-5-22-5-18',
+        answer: 'FOREVER',
+        clue: 'How long this little website hopes to make you smile.'
+      }
+    ];
+
+    let r = 0;
+
+    function draw() {
+
+      if (r >= qs.length) {
+        game2();
+        return;
+      }
+
+      const q = qs[r];
+
+      $('cipherRound').textContent = r + 1;
+      $('cipherCode').textContent = q.code;
+      $('cipherClue').textContent = q.clue;
+      $('cipherInput').value = '';
+
+      $('cipherInput').focus();
+    }
+
+    function check() {
+
+      const input =
+        $('cipherInput').value.trim().toUpperCase();
+
+      if (input === qs[r].answer) {
+
+        r++;
+
+        setFeedback('Decoded! 🧡');
+
+        draw();
+
+      } else {
+
+        setFeedback(
+          'Not yet, detective. Convert each number into its alphabet letter and try again.'
+        );
+
+      }
+    }
+
+    $('cipherSubmit').onclick = check;
+
+    $('cipherInput').onkeydown = function(e) {
+
+      if (e.key === 'Enter') {
+        check();
+      }
+
+    };
+
+    draw();
+  }
+
+
+  /*
+  ============================================================
+  GAME 2 - KINDER CHOCOLATE SURPRISE
+  ============================================================
+  */
+
+  function game2() {
+
+    currentGame = 2;
+
+    area.innerHTML = `
+
+      <div class="subheading">
+        Game 2 of 6 · The Chocolate Surprise 🍫
+      </div>
+
+      <p>
+        Someone left you a little chocolate surprise...
+        Open it carefully and discover what is hiding inside. ❤️
+      </p>
+
+      <div class="center">
+
+        <div id="chocoStage"
+          style="
+            max-width:600px;
+            margin:25px auto;
+            padding:25px;
+            border-radius:28px;
+            background:
+              linear-gradient(
+                135deg,
+                rgba(255,190,210,.30),
+                rgba(255,220,170,.30)
+              );
+            border:2px solid rgba(255,255,255,.3);
+          ">
+
+          <div id="chocoEmoji"
+            style="
+              font-size:110px;
+              cursor:pointer;
+              user-select:none;
+              transition:transform .3s;
+            ">
+            🥚
+          </div>
+
+          <h2 id="chocoTitle">
+            A Mystery Chocolate Egg
+          </h2>
+
+          <p id="chocoText">
+            Tap the egg to start opening your surprise.
+          </p>
+
+          <button
+            id="chocoButton"
+            class="btn btn-primary">
+            Open the Egg 🍫
+          </button>
+
+        </div>
+
+        <div id="toyArea"
+          style="
+            display:none;
+            max-width:600px;
+            margin:20px auto;
+          ">
+
+          <div
+            style="
+              font-size:80px;
+              margin:15px;
+            "
+            id="toyEmoji">
+            🐰
+          </div>
+
+          <h2 id="toyName">
+            Your Surprise Toy!
+          </h2>
+
+          <p id="toyText">
+            Tap the toy and see what it can do!
+          </p>
+
+          <button
+            id="toyButton"
+            class="btn btn-primary">
+            Play With Toy 🎮
+          </button>
+
+        </div>
+
+      </div>
+    `;
+
+    const stages = [
+      {
+        emoji: '🥚',
+        title: 'A Mystery Chocolate Egg',
+        text: 'Tap the egg to start opening your surprise.',
+        button: 'Open the Egg 🍫'
+      },
+      {
+        emoji: '🍫',
+        title: 'Chocolate Found!',
+        text: 'Yum! But something is hiding inside...',
+        button: 'Open the Chocolate ❤️'
+      },
+      {
+        emoji: '🧻',
+        title: 'Unwrapping...',
+        text: 'Carefully unwrap the little surprise.',
+        button: 'Open The Surprise 🎁'
+      },
+      {
+        emoji: '🎁',
+        title: 'Something Is Inside!',
+        text: 'One final step... open the capsule!',
+        button: 'Open Capsule ✨'
+      }
+    ];
+
+    let stage = 0;
+
+    const chocoEmoji = $('chocoEmoji');
+    const chocoTitle = $('chocoTitle');
+    const chocoText = $('chocoText');
+    const chocoButton = $('chocoButton');
+
+    const toyArea = $('toyArea');
+    const toyEmoji = $('toyEmoji');
+    const toyName = $('toyName');
+    const toyText = $('toyText');
+    const toyButton = $('toyButton');
+
+    function showStage() {
+
+      const s = stages[stage];
+
+      chocoEmoji.textContent = s.emoji;
+      chocoTitle.textContent = s.title;
+      chocoText.textContent = s.text;
+      chocoButton.textContent = s.button;
+
+    }
+
+    chocoButton.onclick = function() {
+
+      stage++;
+
+      chocoEmoji.style.transform =
+        'scale(1.3) rotate(8deg)';
+
+      setTimeout(function() {
+
+        chocoEmoji.style.transform =
+          'scale(1) rotate(0deg)';
+
+      }, 250);
+
+      if (stage < stages.length) {
+
+        showStage();
+
+      } else {
+
+        $('chocoStage').style.display = 'none';
+
+        toyArea.style.display = 'block';
+
+        setFeedback(
+          'You found the surprise toy! 🎁❤️'
+        );
+
+      }
+
+    };
+
+    toyButton.onclick = function() {
+
+      const toys = [
+        {
+          emoji: '🐰',
+          name: 'Cute Bunny',
+          text: 'The bunny says: “Someone thinks you are adorable.” 🥰'
+        },
+        {
+          emoji: '🦄',
+          name: 'Love Unicorn',
+          text: 'The unicorn says: “Your smile is magical.” ✨'
+        },
+        {
+          emoji: '🐻',
+          name: 'Teddy Bear',
+          text: 'The teddy says: “Sending you the biggest virtual hug!” 🤗'
+        },
+        {
+          emoji: '🐼',
+          name: 'Love Panda',
+          text: 'The panda says: “You are my favourite person.” ❤️'
+        }
+      ];
+
+      const toy =
+        toys[Math.floor(Math.random() * toys.length)];
+
+      toyEmoji.textContent = toy.emoji;
+      toyName.textContent = toy.name;
+      toyText.textContent = toy.text;
+
+      toyEmoji.style.transform =
+        'scale(1.25) rotate(10deg)';
+
+      setTimeout(function() {
+
+        toyEmoji.style.transform =
+          'scale(1) rotate(0deg)';
+
+      }, 350);
+
+      toyButton.textContent =
+        'Play Again 🎮';
+
+      if (!toyButton.dataset.completed) {
+
+        toyButton.dataset.completed = 'yes';
+
+        setTimeout(function() {
+
+          toyText.innerHTML =
+            toy.text +
+            '<br><br><b>And now... the next surprise is waiting. 💕</b>';
+
+          toyButton.textContent =
+            'Continue to Love Puzzle 🧩';
+
+          toyButton.onclick = function() {
+            game3();
+          };
+
+        }, 700);
+
+      }
+
+    };
+
+    showStage();
+  }
+
+
+  /*
+  ============================================================
+  GAME 3 - LOVE PUZZLE
+  ============================================================
+  */
+
+  function game3() {
+
+  currentGame = 3;
+
+  let level = 1;
+  let sequence = [];
+  let playerSequence = [];
+  let showingSequence = false;
+  let gameFinished = false;
+
+  const symbols = [
+    "❤️",
+    "💕",
+    "💗",
+    "💖",
+    "💝",
+    "🌸",
+    "✨",
+    "🌹"
+  ];
+
+  area.innerHTML = `
+
+    <div class="subheading">
+      Game 3 of 6 · Love Memory Challenge 💕
+    </div>
+
+    <p>
+      Watch the symbols carefully and remember their exact order.
+      Then tap them in the same order. ❤️
+    </p>
+
+    <div class="center">
+
+      <div class="tiny-label">
+        LEVEL <span id="memoryLevel">1</span> / 5
+      </div>
+
+      <h2 id="memoryTitle">
+        Remember My Heart ❤️
+      </h2>
+
+      <p id="memoryInstruction"
+         class="muted">
+        Get ready...
+      </p>
+
+      <div id="memoryBoard"
+        style="
+          display:grid;
+          grid-template-columns:repeat(4,1fr);
+          gap:12px;
+          max-width:500px;
+          margin:25px auto;
+        ">
+      </div>
+
+      <div id="memoryStatus"
+        style="
+          min-height:55px;
+          margin:15px auto;
+          font-weight:bold;
+          font-size:17px;
+        ">
+      </div>
+
+      <button
+        id="memoryStart"
+        class="btn btn-primary">
+        Start Level 1 💕
+      </button>
+
+    </div>
+  `;
+
+  const board = $("memoryBoard");
+  const levelText = $("memoryLevel");
+  const title = $("memoryTitle");
+  const instruction = $("memoryInstruction");
+  const status = $("memoryStatus");
+  const startButton = $("memoryStart");
+
+  function getSequenceLength() {
+
+    return level + 2;
+
+  }
+
+  function createBoard() {
+
+    board.innerHTML = "";
+
+    for (let i = 0; i < 16; i++) {
+
+      const button =
+        document.createElement("button");
+
+      button.type = "button";
+
+      button.textContent = "💌";
+
+      button.dataset.index = i;
+
+      button.style.cssText = `
+        height:75px;
+        border:none;
+        border-radius:18px;
+        background:rgba(255,255,255,.15);
+        font-size:30px;
+        cursor:pointer;
+        transition:
+          transform .2s,
+          background .2s;
+      `;
+
+      button.onclick = function() {
+
+        if (
+          showingSequence ||
+          gameFinished
+        ) {
+          return;
+        }
+
+        checkPlayerMove(i, button);
+
+      };
+
+      board.appendChild(button);
+    }
+  }
+
+  function createSequence() {
+
+    sequence = [];
+
+    const length =
+      getSequenceLength();
+
+    while (sequence.length < length) {
+
+      const randomIndex =
+        Math.floor(
+          Math.random() * 16
+        );
+
+      if (!sequence.includes(randomIndex)) {
+        sequence.push(randomIndex);
+      }
+
+    }
+  }
+
+  function showSequence() {
+
+    showingSequence = true;
+
+    playerSequence = [];
+
+    instruction.textContent =
+      "Watch carefully... 👀❤️";
+
+    status.textContent =
+      "Remember the order!";
+
+    const buttons =
+      board.querySelectorAll("button");
+
+    let position = 0;
+
+    const interval =
+      setInterval(function() {
+
+        if (position > 0) {
+
+          const previous =
+            buttons[
+              sequence[position - 1]
+            ];
+
+          previous.textContent =
+            "💌";
+
+          previous.style.background =
+            "rgba(255,255,255,.15)";
+
+          previous.style.transform =
+            "scale(1)";
+        }
+
+        if (
+          position >= sequence.length
+        ) {
+
+          clearInterval(interval);
+
+          const last =
+            buttons[
+              sequence[
+                sequence.length - 1
+              ]
+            ];
+
+          last.textContent =
+            "💌";
+
+          last.style.background =
+            "rgba(255,255,255,.15)";
+
+          last.style.transform =
+            "scale(1)";
+
+          setTimeout(function() {
+
+            showingSequence = false;
+
+            instruction.textContent =
+              "Now repeat the exact order! 💕";
+
+            status.textContent =
+              "Your turn...";
+
+          }, 500);
+
+          return;
+        }
+
+        const current =
+          buttons[
+            sequence[position]
+          ];
+
+        current.textContent =
+          symbols[
+            position % symbols.length
+          ];
+
+        current.style.background =
+          "rgba(255,120,180,.45)";
+
+        current.style.transform =
+          "scale(1.15)";
+
+        position++;
+
+      }, 750);
+  }
+
+  function checkPlayerMove(
+    index,
+    button
+  ) {
+
+    const expected =
+      sequence[playerSequence.length];
+
+    if (index === expected) {
+
+      playerSequence.push(index);
+
+      button.textContent =
+        symbols[
+          playerSequence.length - 1
+        ];
+
+      button.style.background =
+        "rgba(120,220,160,.4)";
+
+      button.style.transform =
+        "scale(1.08)";
+
+      status.textContent =
+        "Correct! 💕 " +
+        playerSequence.length +
+        " / " +
+        sequence.length;
+
+      if (
+        playerSequence.length ===
+        sequence.length
+      ) {
+
+        levelComplete();
+
+      }
+
+    } else {
+
+      button.style.background =
+        "rgba(255,80,100,.45)";
+
+      button.textContent =
+        "💔";
+
+      status.textContent =
+        "Oops! Wrong order. Try this level again. 😄";
+
+      setFeedback(
+        "Almost! Watch the sequence carefully. ❤️"
+      );
+
+      setTimeout(function() {
+
+        startLevel();
+
+      }, 1200);
+    }
+  }
+
+  function levelComplete() {
+
+    showingSequence = true;
+
+    status.innerHTML =
+      "💖 Perfect! You remembered everything!";
+
+    setFeedback(
+      "Level " + level + " completed! 💕"
+    );
+
+    if (level >= 5) {
+
+      finishGame();
+
+      return;
+    }
+
+    level++;
+
+    levelText.textContent =
+      level;
+
+    setTimeout(function() {
+
+      startButton.style.display =
+        "inline-block";
+
+      startButton.textContent =
+        "Start Level " +
+        level +
+        " 💕";
+
+      instruction.textContent =
+        "The next level will be harder...";
+
+      status.textContent =
+        "Ready for Level " +
+        level +
+        "? 😏";
+
+      showingSequence = false;
+
+    }, 1200);
+  }
+
+  function startLevel() {
+
+    if (gameFinished) {
+      return;
+    }
+
+    showingSequence = true;
+
+    playerSequence = [];
+
+    createBoard();
+
+    createSequence();
+
+    instruction.textContent =
+      "Get ready... 👀";
+
+    status.textContent =
+      "Level " +
+      level +
+      " · " +
+      getSequenceLength() +
+      " symbols";
+
+    startButton.style.display =
+      "none";
+
+    setTimeout(function() {
+
+      showSequence();
+
+    }, 700);
+  }
+
+  function finishGame() {
+
+    gameFinished = true;
+
+    board.innerHTML = `
+
+      <div style="
+        grid-column:1 / -1;
+        padding:25px;
+        text-align:center;
+      ">
+
+        <div style="
+          font-size:75px;
+          margin-bottom:15px;
+        ">
+          💖
+        </div>
+
+        <div style="
+          font-size:25px;
+          font-weight:bold;
+        ">
+          All 5 Levels Complete!
+        </div>
+
+        <div style="
+          margin-top:15px;
+          font-size:17px;
+          line-height:1.6;
+        ">
+          You remembered every little piece
+          of my heart. ❤️
+          <br><br>
+
+          <b>
+            Maybe you know my heart
+            better than you think. 💕
+          </b>
+        </div>
+
+      </div>
+
+    `;
+
+    instruction.textContent =
+      "Memory Master unlocked! 🏆";
+
+    status.innerHTML =
+      "🌸 5 / 5 Levels Completed 🌸";
+
+    startButton.style.display =
+      "none";
+
+    setFeedback(
+      "You completed all 5 memory levels! 💖"
+    );
+
+    setTimeout(function() {
+
+      game4();
+
+    }, 3000);
+  }
+
+  startButton.onclick = function() {
+
+    startLevel();
+
+  };
+
+  createBoard();
+
+  instruction.textContent =
+    "Click Start when you're ready.";
+
+  status.textContent =
+    "Level 1 has 3 symbols.";
+
+}
+
+  /*
+  ============================================================
+  GAME 4 - WORD SORTING
+  ============================================================
+  */
+
   function game4() {
 
     currentGame = 4;
@@ -4758,10 +5633,12 @@ function renderDay4() {
 
       setTimeout(function() {
 
-        completeDay(4);
+  game7();
 
-      }, 3500);
+}, 3500);
     }
+
+    
 
     /*
       Start with three drops.
@@ -4773,6 +5650,354 @@ function renderDay4() {
     createDrop();
 
   }
+  /*
+============================================================
+GAME 7 - JIGSAW PICTURE PUZZLE 🧩
+============================================================
+*/
+function game7() {
+
+  currentGame = 7;
+
+  const puzzleImage = 'assets/love-photo2.png';
+
+  const rows = 3;
+  const cols = 3;
+  const totalPieces = rows * cols;
+
+  let pieces = [];
+  let selectedIndex = null;
+  let solved = false;
+
+  // Create puzzle pieces
+  for (let i = 0; i < totalPieces; i++) {
+
+    pieces.push({
+      correctPosition: i
+    });
+
+  }
+
+  // Shuffle puzzle
+  function shufflePieces() {
+
+    for (let i = pieces.length - 1; i > 0; i--) {
+
+      const randomIndex =
+        Math.floor(Math.random() * (i + 1));
+
+      const temp = pieces[i];
+
+      pieces[i] = pieces[randomIndex];
+
+      pieces[randomIndex] = temp;
+
+    }
+
+    // Make sure puzzle is not already solved
+    if (isSolved()) {
+      shufflePieces();
+    }
+
+  }
+
+  // Check if puzzle is solved
+  function isSolved() {
+
+    for (let i = 0; i < pieces.length; i++) {
+
+      if (pieces[i].correctPosition !== i) {
+        return false;
+      }
+
+    }
+
+    return true;
+  }
+
+  // Draw puzzle
+  function drawPuzzle() {
+
+    const board = $('jigsawBoard');
+
+    board.innerHTML = '';
+
+    pieces.forEach(function(piece, index) {
+
+      const tile = document.createElement('div');
+
+      tile.className = 'jigsaw-piece';
+
+      tile.dataset.index = index;
+
+      // Correct image position
+      const correctPosition =
+        piece.correctPosition;
+
+      const row =
+        Math.floor(correctPosition / cols);
+
+      const col =
+        correctPosition % cols;
+
+      tile.style.backgroundImage =
+        `url('${puzzleImage}')`;
+
+      tile.style.backgroundSize =
+        `${cols * 100}% ${rows * 100}%`;
+
+      tile.style.backgroundPosition =
+        `${col * 50}% ${row * 50}%`;
+
+      tile.style.backgroundRepeat =
+        'no-repeat';
+
+      tile.style.cursor =
+        solved ? 'default' : 'pointer';
+
+      // Selected piece
+      if (selectedIndex === index) {
+
+        tile.style.transform =
+          'scale(0.95)';
+
+        tile.style.boxShadow =
+          '0 0 0 4px #ff69b4';
+
+      }
+
+      tile.onclick = function() {
+
+        if (solved) {
+          return;
+        }
+
+        // Select first piece
+        if (selectedIndex === null) {
+
+          selectedIndex = index;
+
+          drawPuzzle();
+
+          setFeedback(
+            '🧩 Now select another piece to swap!'
+          );
+
+          return;
+        }
+
+        // Click same piece again
+        if (selectedIndex === index) {
+
+          selectedIndex = null;
+
+          drawPuzzle();
+
+          return;
+        }
+
+        // Swap pieces
+        const temp =
+          pieces[selectedIndex];
+
+        pieces[selectedIndex] =
+          pieces[index];
+
+        pieces[index] =
+          temp;
+
+        selectedIndex = null;
+
+        drawPuzzle();
+
+        // Check puzzle
+        if (isSolved()) {
+
+          finishPuzzle();
+
+        } else {
+
+          setFeedback(
+            '💗 Keep going! You are doing great! 🧩'
+          );
+
+        }
+
+      };
+
+      board.appendChild(tile);
+
+    });
+
+  }
+
+  // Finish puzzle
+  function finishPuzzle() {
+
+    solved = true;
+
+    selectedIndex = null;
+
+    drawPuzzle();
+
+    const message =
+      $('jigsawMessage');
+
+    const success =
+      $('jigsawSuccess');
+
+    message.textContent =
+      '🎉 You completed the picture! ❤️';
+
+    success.style.display =
+      'block';
+
+    setFeedback(
+      '🧩 Jigsaw completed! ❤️ Now complete Day 4!'
+    );
+
+  }
+
+  // Start with shuffled pieces
+  shufflePieces();
+
+  // Show game interface
+  $('gameArea').innerHTML = `
+
+    <div style="
+      max-width:850px;
+      margin:auto;
+      text-align:center;
+      padding:20px;
+    ">
+
+      <h2 style="
+        color:#ff69b4;
+        margin-bottom:10px;
+      ">
+        🧩 Love Jigsaw Puzzle
+      </h2>
+
+      <p style="
+        font-size:17px;
+        margin-bottom:20px;
+      ">
+        Put the picture back together! ❤️
+      </p>
+
+      <div
+        id="jigsawBoard"
+        style="
+          width:min(90vw,600px);
+          aspect-ratio:1/1;
+          margin:20px auto;
+          display:grid;
+          grid-template-columns:repeat(3,1fr);
+          grid-template-rows:repeat(3,1fr);
+          gap:4px;
+          background:#222;
+          padding:4px;
+          border-radius:15px;
+          overflow:hidden;
+          box-shadow:0 10px 30px rgba(0,0,0,0.25);
+        ">
+      </div>
+
+      <p
+        id="jigsawMessage"
+        style="
+          min-height:25px;
+          font-size:16px;
+          margin:10px 0;
+        ">
+        Select two pieces to swap them.
+      </p>
+
+      <div style="
+        display:flex;
+        justify-content:center;
+        gap:10px;
+        flex-wrap:wrap;
+        margin-top:20px;
+      ">
+
+        <button
+          id="shufflePuzzle"
+          class="btn">
+          🔀 Shuffle Again
+        </button>
+
+      </div>
+
+      <div
+        id="jigsawSuccess"
+        style="
+          display:none;
+          margin-top:25px;
+          padding:25px;
+          border-radius:20px;
+          background:rgba(255,105,180,0.12);
+        ">
+
+        <h3 style="
+          color:#ff69b4;
+          margin-bottom:10px;
+        ">
+          🎉 Beautiful! ❤️
+        </h3>
+
+        <p>
+          You successfully completed the love picture puzzle!
+        </p>
+
+        <button
+          id="finishDay4"
+          class="btn"
+          style="margin-top:15px;">
+          🧡 Complete Day 4
+        </button>
+
+      </div>
+
+    </div>
+
+  `;
+
+  // Draw initial puzzle
+  drawPuzzle();
+
+  // Shuffle button
+  $('shufflePuzzle').onclick =
+    function() {
+
+      if (solved) {
+        return;
+      }
+
+      selectedIndex = null;
+
+      shufflePieces();
+
+      drawPuzzle();
+
+      $('jigsawMessage').textContent =
+        '🔀 Puzzle shuffled! Try again! 🧩❤️';
+
+      setFeedback(
+        '🔀 Puzzle shuffled! Good luck! ❤️'
+      );
+
+    };
+
+  // Complete Day 4 button
+  $('finishDay4').onclick =
+    function() {
+
+      completeDay(4);
+
+    };
+
+}
 
 
   /*
