@@ -105,8 +105,526 @@
   function startGameForDay(day){game={initialized:true,round:1,score:0,step:0,attempts:0,selected:[],matched:[],path:[],turns:0,mini:0};startedAt=Date.now();$('elapsed').textContent='00:00';setFeedback('');if(day===1)renderDay1();if(day===2)renderDay2();if(day===3)renderDay3();if(day===4)renderDay4()}
   function hint(){if(currentDay===1){setFeedback(['Take your time; look for patterns, not speed.','Memory game: say the sequence quietly before tapping.','Word puzzle: tap words in the order they should appear.'][game.mini||0])}else if(currentDay===2)setFeedback('Hint: focus on the order of the four symbols, not how quickly they flash.');else if(currentDay===3)setFeedback('Hint: plan a route to the glowing heart. You can move with the arrow buttons; walls are dark.');else if(currentDay===4)setFeedback('Hint: A=1, B=2, C=3… Use the repeating gaps in the number code.');else toast('Follow your heart 🧡')}
   function finishMini(message){game.score++;setFeedback(message);if(game.score>=3){completeDay(1);$('gameDescription').textContent='All three mini-games cleared! Play again or pick a new mini-game below.';const b=document.createElement('button');b.className='btn btn-primary';b.textContent='Play the mini-games again';b.onclick=()=>{game.score=0;game.mini=0;newGame()};$('gameArea').appendChild(b)}else{game.mini++;setTimeout(()=>renderDay1(),650)}}
-  function renderDay1(){const area=$('gameArea');area.innerHTML='';if(game.mini===0){area.innerHTML='<div class="subheading">Mini-game 1 of 3 · Memory Spark</div><p>Watch the four-heart sequence, then tap the matching symbols in the same order. Three rounds to pass.</p><div id="sequenceDisplay" class="sequence-display">Ready? 🧡</div><div class="tiles" id="memoryTiles"></div><div class="center"><button class="btn btn-secondary" id="showSequence">Show sequence</button></div>';const symbols=['🧡','🌙','🌸','⭐'];let seq=[];let round=0;const display=$('sequenceDisplay'),tiles=$('memoryTiles');symbols.forEach(s=>{const b=document.createElement('button');b.className='tile';b.textContent=s;b.onclick=()=>{if(!game.accepting)return;const v=seq[game.step];if(s===v){game.step++;b.classList.add('correct');if(game.step===seq.length){game.accepting=false;round++;if(round>=3)finishMini('Memory Spark cleared! 🧠');else{display.textContent=`Perfect! Round ${round}/3`;setTimeout(next,500)}}}else{display.textContent='Oops! Try that round again 💕';game.step=0;tiles.querySelectorAll('.tile').forEach(x=>x.classList.remove('correct'))}};tiles.appendChild(b)});function next(){seq=Array.from({length:3+round},()=>symbols[Math.floor(Math.random()*symbols.length)]);game.step=0;game.accepting=false;display.textContent=seq.join('  ');setTimeout(()=>{display.textContent='Now repeat it!';game.accepting=true;tiles.querySelectorAll('.tile').forEach(x=>x.classList.remove('correct'))},900)}$('showSequence').onclick=next;next()}else if(game.mini===1){area.innerHTML='<div class="subheading">Mini-game 2 of 3 · Pattern Picnic</div><p>Find the missing number. Tap the answer tile, then solve two more patterns. No MCQs: just tap the number that completes the pattern.</p><h2 class="center" id="patternQuestion"></h2><div class="tiles" id="patternTiles"></div>';const qs=[{q:'2, 4, 8, 16, __',a:32,opts:[24,30,32,36]},{q:'1, 4, 9, 16, __',a:25,opts:[20,24,25,36]},{q:'3, 6, 11, 18, __',a:27,opts:[25,26,27,29]}];let r=0;function draw(){if(r>=qs.length){finishMini('Pattern Picnic complete! Your brain has excellent taste.');return}const q=qs[r];$('patternQuestion').textContent=q.q;$('patternTiles').innerHTML='';q.opts.sort(()=>Math.random()-.5).forEach(n=>{const b=document.createElement('button');b.className='tile';b.textContent=n;b.onclick=()=>{if(n===q.a){r++;draw()}else{b.classList.add('wrong');setFeedback('Not quite, sweetheart. Look at how the numbers grow, then try again!')}};$('patternTiles').appendChild(b)})}draw()}else{area.innerHTML='<div class="subheading">Mini-game 3 of 3 · Build a Love Note</div><p>Tap the words to arrange this scrambled note into a sentence. Tap a placed word to send it back.</p><div id="wordSlots" class="word-slots"></div><div id="wordBank" class="word-bank"></div><div class="center"><button id="checkWords" class="btn btn-primary">Check our little note</button></div>';const words=['you','make','my','ordinary','days','feel','magical'];let order=words.map((w,i)=>({w,i})).sort(()=>Math.random()-.5),chosen=[];const slots=$('wordSlots'),bank=$('wordBank');function draw(){slots.innerHTML='';bank.innerHTML='';chosen.forEach((o,i)=>{const b=document.createElement('button');b.className='slot';b.textContent=o.w;b.onclick=()=>{order.push(o);chosen.splice(i,1);draw()};slots.appendChild(b)});order.forEach(o=>{const b=document.createElement('button');b.className='word-chip';b.textContent=o.w;b.onclick=()=>{chosen.push(o);order=order.filter(x=>x.i!==o.i);draw()};bank.appendChild(b)})}draw();$('checkWords').onclick=()=>{if(chosen.map(x=>x.w).join(' ')==='you make my ordinary days feel magical'){finishMini('Love note assembled perfectly. You make my ordinary days feel magical. 🧡')}else setFeedback('Almost! Rearrange the words into a sentence that makes your heart smile.') }}}
-  
+function renderDay1() {
+
+  const area = $('gameArea');
+
+  // Clear previous game
+  area.innerHTML = '';
+
+  // Make sure game variables exist
+  if (typeof game.mini !== 'number') {
+    game.mini = 0;
+  }
+
+  if (typeof game.score !== 'number') {
+    game.score = 0;
+  }
+
+  /*
+  ============================================================
+  DAY 1 - MINI GAME 1
+  MEMORY SPARK
+  ============================================================
+  */
+
+  if (game.mini === 0) {
+
+    area.innerHTML = `
+      <div class="subheading">
+        Mini-game 1 of 3 · Memory Spark
+      </div>
+
+      <p>
+        Watch the heart sequence carefully.
+        Then tap the symbols in exactly the same order.
+      </p>
+
+      <div id="sequenceDisplay" class="sequence-display">
+        Get ready... 🧡
+      </div>
+
+      <div class="tiles" id="memoryTiles"></div>
+
+      <div class="center">
+        <button class="btn btn-secondary" id="showSequence">
+          Show sequence
+        </button>
+      </div>
+    `;
+
+    const symbols = ['🧡', '🌙', '🌸', '⭐'];
+
+    let sequence = [];
+    let round = 0;
+
+    const display = $('sequenceDisplay');
+    const tiles = $('memoryTiles');
+    const showButton = $('showSequence');
+
+    game.step = 0;
+    game.accepting = false;
+
+    // Create symbol buttons
+    symbols.forEach(function(symbol) {
+
+      const button = document.createElement('button');
+
+      button.className = 'tile';
+      button.textContent = symbol;
+
+      button.addEventListener('click', function() {
+
+        // Do nothing while sequence is being shown
+        if (!game.accepting) {
+          return;
+        }
+
+        const expected = sequence[game.step];
+
+        // Correct answer
+        if (symbol === expected) {
+
+          game.step++;
+
+          button.classList.add('correct');
+
+          // Entire sequence completed
+          if (game.step === sequence.length) {
+
+            game.accepting = false;
+
+            round++;
+
+            if (round >= 3) {
+
+              finishMini(
+                'Memory Spark cleared! 🧠🧡'
+              );
+
+            } else {
+
+              display.textContent =
+                'Perfect! Round ' + round + '/3 🧡';
+
+              setTimeout(function() {
+                startMemoryRound();
+              }, 700);
+            }
+          }
+
+        } else {
+
+          // Wrong answer
+          game.accepting = false;
+
+          display.textContent =
+            'Oops! Wrong order. Try the same round again 💕';
+
+          game.step = 0;
+
+          // Remove correct marks
+          tiles.querySelectorAll('.tile').forEach(function(tile) {
+            tile.classList.remove('correct');
+          });
+
+          // Allow retry after short delay
+          setTimeout(function() {
+
+            display.textContent =
+              'Try again! Watch carefully 👀';
+
+            game.accepting = true;
+
+          }, 800);
+        }
+
+      });
+
+      tiles.appendChild(button);
+    });
+
+
+    // Start a memory round
+    function startMemoryRound() {
+
+      sequence = [];
+
+      const sequenceLength = 3 + round;
+
+      for (let i = 0; i < sequenceLength; i++) {
+
+        const randomIndex =
+          Math.floor(Math.random() * symbols.length);
+
+        sequence.push(symbols[randomIndex]);
+      }
+
+      game.step = 0;
+      game.accepting = false;
+
+      // Remove previous marks
+      tiles.querySelectorAll('.tile').forEach(function(tile) {
+        tile.classList.remove('correct');
+      });
+
+      // Show sequence
+      display.textContent =
+        sequence.join('   ');
+
+      // Hide sequence after 1.5 seconds
+      setTimeout(function() {
+
+        display.textContent =
+          'Now repeat it! 💕';
+
+        game.accepting = true;
+
+      }, 1500);
+    }
+
+
+    // Manual show button
+    showButton.addEventListener('click', function() {
+
+      if (game.accepting) {
+        return;
+      }
+
+      display.textContent =
+        sequence.join('   ');
+
+      setTimeout(function() {
+
+        display.textContent =
+          'Now repeat it! 💕';
+
+        game.accepting = true;
+
+      }, 1500);
+
+    });
+
+
+    // Start first round
+    startMemoryRound();
+
+  }
+
+
+  /*
+  ============================================================
+  DAY 1 - MINI GAME 2
+  PATTERN PICNIC
+  ============================================================
+  */
+
+  else if (game.mini === 1) {
+
+    area.innerHTML = `
+      <div class="subheading">
+        Mini-game 2 of 3 · Pattern Picnic
+      </div>
+
+      <p>
+        Find the missing number.
+        Tap the correct answer.
+      </p>
+
+      <h2 class="center" id="patternQuestion"></h2>
+
+      <div class="tiles" id="patternTiles"></div>
+    `;
+
+    const questions = [
+
+      {
+        question: '2, 4, 8, 16, __',
+        answer: 32,
+        options: [24, 30, 32, 36]
+      },
+
+      {
+        question: '1, 4, 9, 16, __',
+        answer: 25,
+        options: [20, 24, 25, 36]
+      },
+
+      {
+        question: '3, 6, 11, 18, __',
+        answer: 27,
+        options: [25, 26, 27, 29]
+      }
+
+    ];
+
+    let questionNumber = 0;
+
+    const questionText = $('patternQuestion');
+    const answerArea = $('patternTiles');
+
+
+    function showQuestion() {
+
+      // All questions completed
+      if (questionNumber >= questions.length) {
+
+        finishMini(
+          'Pattern Picnic complete! 🧠🧡'
+        );
+
+        return;
+      }
+
+      const question =
+        questions[questionNumber];
+
+      questionText.textContent =
+        question.question;
+
+      answerArea.innerHTML = '';
+
+      // Create a copy so the original array isn't changed
+      const options =
+        [...question.options];
+
+      // Shuffle options
+      options.sort(function() {
+        return Math.random() - 0.5;
+      });
+
+
+      options.forEach(function(number) {
+
+        const button =
+          document.createElement('button');
+
+        button.className = 'tile';
+
+        button.textContent = number;
+
+        button.addEventListener('click', function() {
+
+          if (number === question.answer) {
+
+            questionNumber++;
+
+            setFeedback(
+              'Correct! 💕'
+            );
+
+            showQuestion();
+
+          } else {
+
+            button.classList.add('wrong');
+
+            setFeedback(
+              'Not quite! Look at the pattern and try again 💕'
+            );
+
+          }
+
+        });
+
+        answerArea.appendChild(button);
+
+      });
+
+    }
+
+
+    showQuestion();
+
+  }
+
+
+  /*
+  ============================================================
+  DAY 1 - MINI GAME 3
+  BUILD A LOVE NOTE
+  ============================================================
+  */
+
+  else {
+
+    area.innerHTML = `
+      <div class="subheading">
+        Mini-game 3 of 3 · Build a Love Note
+      </div>
+
+      <p>
+        Tap the words to arrange them into the correct sentence.
+        Tap a placed word to move it back.
+      </p>
+
+      <div id="wordSlots" class="word-slots"></div>
+
+      <div id="wordBank" class="word-bank"></div>
+
+      <div class="center">
+        <button
+          id="checkWords"
+          class="btn btn-primary">
+          Check our little note
+        </button>
+      </div>
+    `;
+
+
+    const words = [
+      'you',
+      'make',
+      'my',
+      'ordinary',
+      'days',
+      'feel',
+      'magical'
+    ];
+
+
+    const correctSentence =
+      'you make my ordinary days feel magical';
+
+
+    let wordBank =
+      words.map(function(word, index) {
+
+        return {
+          word: word,
+          id: index
+        };
+
+      });
+
+
+    let selectedWords = [];
+
+
+    // Shuffle the words
+    wordBank.sort(function() {
+      return Math.random() - 0.5;
+    });
+
+
+    const slots = $('wordSlots');
+    const bank = $('wordBank');
+    const checkButton = $('checkWords');
+
+
+    function drawWords() {
+
+      slots.innerHTML = '';
+      bank.innerHTML = '';
+
+
+      /*
+      -----------------------------
+      SELECTED WORDS
+      -----------------------------
+      */
+
+      selectedWords.forEach(function(item, index) {
+
+        const button =
+          document.createElement('button');
+
+        button.className = 'slot';
+
+        button.textContent =
+          item.word;
+
+        button.addEventListener('click', function() {
+
+          // Move word back to bank
+          wordBank.push(item);
+
+          selectedWords.splice(index, 1);
+
+          drawWords();
+
+        });
+
+        slots.appendChild(button);
+
+      });
+
+
+      /*
+      -----------------------------
+      WORD BANK
+      -----------------------------
+      */
+
+      wordBank.forEach(function(item) {
+
+        const button =
+          document.createElement('button');
+
+        button.className = 'word-chip';
+
+        button.textContent =
+          item.word;
+
+        button.addEventListener('click', function() {
+
+          // Move word to sentence
+          selectedWords.push(item);
+
+          wordBank =
+            wordBank.filter(function(word) {
+              return word.id !== item.id;
+            });
+
+          drawWords();
+
+        });
+
+        bank.appendChild(button);
+
+      });
+
+    }
+
+
+    /*
+    -----------------------------
+    CHECK ANSWER
+    -----------------------------
+    */
+
+    checkButton.addEventListener('click', function() {
+
+      const sentence =
+        selectedWords
+          .map(function(item) {
+            return item.word;
+          })
+          .join(' ');
+
+
+      if (sentence === correctSentence) {
+
+        finishMini(
+          'Love note assembled perfectly! 🧡'
+        );
+
+      } else {
+
+        setFeedback(
+          'Almost! Arrange the words into the correct sentence 💕'
+        );
+
+      }
+
+    });
+
+
+    drawWords();
+
+  }
+
+}  
 
   function renderDay2(){
 
