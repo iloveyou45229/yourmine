@@ -4746,7 +4746,7 @@ function renderDay4() {
 
   const area = $('gameArea');
 
-  const IMAGE = 'assets/love-photo2.';
+  const IMAGE = 'assets/love-photo2.png';
 
   const SIZE = 3;
   const TOTAL = SIZE * SIZE;
