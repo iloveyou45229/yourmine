@@ -111,7 +111,7 @@
 
   setFeedback(message);
 
-  if(game.score >= 3){
+  if(game.score >= 4){
 
     completeDay(1);
 
