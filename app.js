@@ -4742,309 +4742,497 @@ function renderDay4() {
 
   function game6() {
 
-    currentGame = 6;
+  currentGame = 6;
 
-    let drops = 0;
-    let flowerStage = 0;
-    let gameFinished = false;
+  const area = $('gameArea');
 
-    area.innerHTML = `
+  const IMAGE = 'assets/love-photo2.';
 
-      <div class="subheading">
-        Game 6 of 6 · Grow Our Little Love Garden 🌸
-      </div>
+  const SIZE = 3;
+  const TOTAL = SIZE * SIZE;
 
-      <p>
-        This one is different.
-        Collect the little love drops and help a tiny flower bloom.
-        🌱❤️
-      </p>
+  let pieces = [];
+  let firstSelected = null;
+  let moves = 0;
+  let solved = false;
 
-      <div class="center">
+  /*
+  ------------------------------------------------------------
+  CREATE PUZZLE
+  ------------------------------------------------------------
+  */
 
-        <div
-          style="
-            max-width:650px;
-            margin:20px auto;
-            padding:25px;
-            border-radius:30px;
-            background:
-              linear-gradient(
-                180deg,
-                rgba(170,220,255,.20),
-                rgba(120,200,140,.25)
-              );
-            position:relative;
-            overflow:hidden;
-          "
-          id="gardenArea">
+  function createPuzzle() {
 
-          <div
-            style="
-              font-size:80px;
-              min-height:120px;
-              display:flex;
-              align-items:center;
-              justify-content:center;
-              transition:transform .5s;
-            "
-            id="flower">
-            🌱
-          </div>
+    pieces = [];
 
-          <div
-            style="
-              font-size:18px;
-              font-weight:bold;
-              margin:15px;
-            "
-            id="gardenMessage">
-            Our little flower is waiting for some love...
-          </div>
+    for (let i = 0; i < TOTAL; i++) {
+      pieces.push(i);
+    }
 
-          <div
-            style="
-              height:15px;
-              background:rgba(255,255,255,.3);
-              border-radius:20px;
-              overflow:hidden;
-              max-width:400px;
-              margin:15px auto;
-            "
-          >
+    shufflePuzzle();
 
-            <div
-              id="flowerProgress"
-              style="
-                width:0%;
-                height:100%;
-                border-radius:20px;
-                background:currentColor;
-                transition:width .4s;
-              ">
-            </div>
+    moves = 0;
+    solved = false;
+    firstSelected = null;
 
-          </div>
+    drawPuzzle();
+  }
 
-          <div
-            style="
-              font-weight:bold;
-              margin:10px;
-            "
-          >
-            💧 Love Drops:
-            <span id="dropCount">0</span> / 12
-          </div>
 
-          <div
-            id="loveDrops"
-            style="
-              position:relative;
-              height:170px;
-              margin-top:15px;
-            ">
-          </div>
+  /*
+  ------------------------------------------------------------
+  SHUFFLE
+  ------------------------------------------------------------
+  */
 
-        </div>
+  function shufflePuzzle() {
 
-      </div>
-    `;
+    do {
 
-    const garden =
-      $('loveDrops');
+      for (let i = pieces.length - 1; i > 0; i--) {
 
-    const flower =
-      $('flower');
+        const j =
+          Math.floor(Math.random() * (i + 1));
 
-    const message =
-      $('gardenMessage');
+        const temp = pieces[i];
 
-    const progress =
-      $('flowerProgress');
-
-    const dropCount =
-      $('dropCount');
-
-    const messages = [
-      'A tiny bit of love... 💕',
-      'It is starting to grow... 🌱',
-      'Someone is taking very good care of it. 🥰',
-      'The flower can feel your love. ❤️',
-      'Almost there... 🌷',
-      'It is becoming beautiful! ✨',
-      'Our little garden is glowing. 💗',
-      'One more little bit of love... 💕',
-      'Look how much it has grown! 🌸',
-      'Your love is magic. ✨',
-      'Almost completely bloomed... 🌺',
-      'You did it! ❤️'
-    ];
-
-    function createDrop() {
-
-      if (gameFinished) {
-        return;
+        pieces[i] = pieces[j];
+        pieces[j] = temp;
       }
 
-      const drop =
+    } while (
+      pieces.every(function(piece, index) {
+        return piece === index;
+      })
+    );
+  }
+
+
+  /*
+  ------------------------------------------------------------
+  DRAW PUZZLE
+  ------------------------------------------------------------
+  */
+
+  function drawPuzzle() {
+
+    const board = $('jigsawBoard');
+
+    if (!board) return;
+
+    board.innerHTML = '';
+
+    pieces.forEach(function(correctPiece, position) {
+
+      const tile =
         document.createElement('button');
 
-      drop.type = 'button';
+      tile.type = 'button';
 
-      drop.textContent =
-        drops % 2 === 0
-          ? '💧'
-          : '💕';
+      tile.className = 'jigsaw-piece';
 
-      drop.setAttribute(
+      tile.dataset.position = position;
+
+      /*
+      Calculate where this correct piece belongs
+      */
+
+      const correctRow =
+        Math.floor(correctPiece / SIZE);
+
+      const correctCol =
+        correctPiece % SIZE;
+
+      const x =
+        correctCol * 50;
+
+      const y =
+        correctRow * 50;
+
+      tile.style.backgroundImage =
+        `url("${IMAGE}")`;
+
+      tile.style.backgroundSize =
+        '300% 300%';
+
+      tile.style.backgroundPosition =
+        `${x}% ${y}%`;
+
+      tile.setAttribute(
         'aria-label',
-        'Collect love drop'
+        'Jigsaw piece ' + (position + 1)
       );
 
-      drop.style.cssText = `
-        position:absolute;
-        border:none;
-        background:transparent;
-        font-size:32px;
-        cursor:pointer;
-        left:${10 + Math.random() * 80}%;
-        top:${10 + Math.random() * 75}%;
-        transition:transform .2s, opacity .2s;
-      `;
+      tile.onclick = function() {
 
-      drop.onclick = function() {
+        if (solved) return;
 
-        if (gameFinished) {
-          return;
-        }
-
-        drops++;
-
-        dropCount.textContent =
-          drops;
-
-        progress.style.width =
-          ((drops / 12) * 100) + '%';
-
-        message.textContent =
-          messages[drops - 1];
-
-        drop.style.transform =
-          'scale(1.7)';
-
-        drop.style.opacity =
-          '0';
-
-        setTimeout(function() {
-
-          if (drop.parentNode) {
-            drop.parentNode.removeChild(drop);
-          }
-
-        }, 180);
-
-        updateFlower();
-
-        if (drops < 12) {
-          createDrop();
-        }
+        selectPiece(position);
 
       };
 
-      garden.appendChild(drop);
-    }
+      board.appendChild(tile);
 
-    function updateFlower() {
+    });
 
-      if (drops <= 2) {
-
-        flower.textContent = '🌱';
-        flower.style.transform =
-          'scale(1)';
-
-      } else if (drops <= 5) {
-
-        flower.textContent = '🌿';
-        flower.style.transform =
-          'scale(1.1)';
-
-      } else if (drops <= 8) {
-
-        flower.textContent = '🌷';
-        flower.style.transform =
-          'scale(1.2)';
-
-      } else if (drops <= 11) {
-
-        flower.textContent = '🌺';
-        flower.style.transform =
-          'scale(1.3)';
-
-      } else {
-
-        finishGarden();
-      }
-
-    }
-
-    function finishGarden() {
-
-      if (gameFinished) {
-        return;
-      }
-
-      gameFinished = true;
-
-      garden.innerHTML = '';
-
-      flower.textContent =
-        '💐';
-
-      flower.style.transform =
-        'scale(1.5)';
-
-      message.innerHTML = `
-        <div style="font-size:22px;">
-          Our little love garden is blooming. 💐❤️
-        </div>
-
-        <div style="
-          margin-top:15px;
-          line-height:1.7;
-          font-size:16px;
-        ">
-          You gave it 12 little drops of love...
-          <br>
-          and somehow it became something beautiful.
-          <br><br>
-
-          <b>
-            Just like us. 💕
-          </b>
-        </div>
-      `;
-
-      setFeedback(
-        'You grew the Love Garden! 🌸❤️'
-      );
-
-      setTimeout(function() {
-
-        completeDay(4);
-
-      }, 3500);
-    }
-
-    /*
-      Start with three drops.
-      New ones appear as she collects them.
-    */
-
-    createDrop();
-    createDrop();
-    createDrop();
+    updateMoveText();
 
   }
+
+
+  /*
+  ------------------------------------------------------------
+  SELECT / SWAP PIECES
+  ------------------------------------------------------------
+  */
+
+  function selectPiece(position) {
+
+    const board =
+      $('jigsawBoard');
+
+    const tiles =
+      board.querySelectorAll('.jigsaw-piece');
+
+    if (firstSelected === null) {
+
+      firstSelected = position;
+
+      tiles[position].classList.add(
+        'jigsaw-selected'
+      );
+
+      setFeedback(
+        'Now choose another piece to swap with it. 🧩'
+      );
+
+      return;
+    }
+
+
+    if (firstSelected === position) {
+
+      tiles[position].classList.remove(
+        'jigsaw-selected'
+      );
+
+      firstSelected = null;
+
+      setFeedback(
+        'Selection cancelled. 🧩'
+      );
+
+      return;
+    }
+
+
+    /*
+    Swap the two pieces
+    */
+
+    const secondSelected = position;
+
+    const temp =
+      pieces[firstSelected];
+
+    pieces[firstSelected] =
+      pieces[secondSelected];
+
+    pieces[secondSelected] =
+      temp;
+
+    moves++;
+
+    firstSelected = null;
+
+    drawPuzzle();
+
+    checkSolved();
+
+  }
+
+
+  /*
+  ------------------------------------------------------------
+  CHECK SOLUTION
+  ------------------------------------------------------------
+  */
+
+  function checkSolved() {
+
+    const isSolved =
+      pieces.every(function(piece, index) {
+
+        return piece === index;
+
+      });
+
+
+    if (!isSolved) {
+
+      setFeedback(
+        'Keep going! You are getting closer. ❤️'
+      );
+
+      return;
+
+    }
+
+
+    solved = true;
+
+    setFeedback(
+      '🎉 Puzzle complete! Our picture is back together. ❤️'
+    );
+
+    const board =
+      $('jigsawBoard');
+
+    const tiles =
+      board.querySelectorAll('.jigsaw-piece');
+
+    tiles.forEach(function(tile) {
+
+      tile.classList.add(
+        'jigsaw-solved'
+      );
+
+    });
+
+
+    setTimeout(function() {
+
+      completeDay(4);
+
+    }, 1200);
+
+  }
+
+
+  /*
+  ------------------------------------------------------------
+  MOVE COUNTER
+  ------------------------------------------------------------
+  */
+
+  function updateMoveText() {
+
+    const moveText =
+      $('jigsawMoves');
+
+    if (moveText) {
+
+      moveText.textContent =
+        'Moves: ' + moves;
+
+    }
+
+  }
+
+
+  /*
+  ------------------------------------------------------------
+  HTML
+  ------------------------------------------------------------
+  */
+
+  area.innerHTML = `
+
+    <div class="subheading">
+      Game 6 of 6 · Our Love Jigsaw 🧩❤️
+    </div>
+
+    <p>
+      Put our picture back together.
+      Click two pieces to swap them.
+      Complete all 9 pieces to finish Day 4. 💕
+    </p>
+
+    <div class="center">
+
+      <div class="tiny-label">
+        3 × 3 LOVE PUZZLE
+      </div>
+
+      <div
+        id="jigsawMoves"
+        style="
+          margin:12px 0;
+          font-weight:bold;
+        "
+      >
+        Moves: 0
+      </div>
+
+
+      <div
+        id="jigsawBoard"
+        style="
+          width:min(90vw,450px);
+          aspect-ratio:1;
+          margin:25px auto;
+          display:grid;
+          grid-template-columns:repeat(3,1fr);
+          gap:4px;
+          padding:4px;
+          border-radius:20px;
+          overflow:hidden;
+          background:rgba(255,255,255,.15);
+        "
+      >
+      </div>
+
+
+      <div
+        style="
+          display:flex;
+          justify-content:center;
+          gap:12px;
+          flex-wrap:wrap;
+          margin-top:15px;
+        "
+      >
+
+        <button
+          id="shuffleJigsaw"
+          class="btn btn-primary"
+        >
+          🔀 Shuffle Puzzle
+        </button>
+
+      </div>
+
+      <p
+        class="muted"
+        style="margin-top:18px;"
+      >
+        Tip: click one piece, then click another piece
+        to swap them. 🧩❤️
+      </p>
+
+    </div>
+  `;
+
+
+  /*
+  ------------------------------------------------------------
+  JIGSAW CSS
+  ------------------------------------------------------------
+  */
+
+  const style =
+    document.createElement('style');
+
+  style.textContent = `
+
+    .jigsaw-piece {
+
+      width:100%;
+      height:100%;
+
+      border:none;
+      padding:0;
+
+      cursor:pointer;
+
+      background-repeat:no-repeat;
+
+      border-radius:8px;
+
+      transition:
+        transform .2s,
+        filter .2s,
+        box-shadow .2s;
+
+      box-sizing:border-box;
+
+    }
+
+
+    .jigsaw-piece:hover {
+
+      transform:scale(.97);
+
+      filter:brightness(1.08);
+
+    }
+
+
+    .jigsaw-selected {
+
+      transform:scale(.92);
+
+      box-shadow:
+        0 0 0 4px currentColor;
+
+      filter:brightness(1.2);
+
+      z-index:2;
+
+    }
+
+
+    .jigsaw-solved {
+
+      cursor:default;
+
+      transform:scale(1);
+
+      box-shadow:none;
+
+      filter:none;
+
+    }
+
+  `;
+
+  document.head.appendChild(style);
+
+
+  /*
+  ------------------------------------------------------------
+  SHUFFLE BUTTON
+  ------------------------------------------------------------
+  */
+
+  $('shuffleJigsaw').onclick =
+    function() {
+
+      if (solved) {
+
+        setFeedback(
+          'The puzzle is already complete! 🧡'
+        );
+
+        return;
+
+      }
+
+      shufflePuzzle();
+
+      firstSelected = null;
+
+      moves = 0;
+
+      drawPuzzle();
+
+      setFeedback(
+        'Puzzle shuffled! Good luck, love. 🧩❤️'
+      );
+
+    };
+
+
+  /*
+  ------------------------------------------------------------
+  START PUZZLE
+  ------------------------------------------------------------
+  */
+
+  createPuzzle();
+
+}
 
 
   /*
