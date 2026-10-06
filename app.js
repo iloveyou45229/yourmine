@@ -33,7 +33,7 @@
   function show(id,yes){$(id).classList.toggle('hidden',!yes)}
   function init(){state=loadState();musicOn=state.musicOn!==false;$('registerBadge').textContent='LOVE ID: '+state.register;$('soundLabel').textContent=musicOn?'Music on':'Music off';const sch=schedule();currentDay=determineDay();document.body.dataset.day=currentDay;renderJourney();renderPhotoGrid();renderPage();startClock();startMusic();$('soundBtn').addEventListener('click',toggleMusic);$('newGameBtn').addEventListener('click',newGame);$('hintBtn').addEventListener('click',hint);$('showAllBtn').addEventListener('click',()=>{state.revealed=[true,true,true,true];saveState();renderPhotoGrid();toast('A preview of all four pieces 🧡')});$('backToGameBtn').addEventListener('click',()=>{show('gamePanel',true);$('gamePanel').scrollIntoView({behavior:'smooth',block:'start'});newGame()});$('shootBtn').addEventListener('click',shootArrow);$('dontClickBtn').addEventListener('click',openVideo);$('closeVideo').addEventListener('click',closeVideo);$('videoDialog').addEventListener('click',e=>{if(e.target===$('videoDialog'))closeVideo()});window.addEventListener('storage',e=>{if(e.key===KEY){state=loadState();renderJourney();renderPage()}});}
   function renderPage(){const sch=schedule(),now=new Date();currentDay=determineDay();for(let i=0;i<4;i++){if(now>=sch[i].end)state.completed[i]=true}if(currentDay===5)state.completed=[true,true,true,true,true];saveState();document.body.dataset.day=currentDay;const idx=currentDay-1;$('dayName').textContent=`Day ${currentDay} of 5`;const dayStart=sch[idx].start;$('dayDate').textContent=currentDay===1?`Started ${formatDate(new Date(state.firstOpened))}`:`Opens ${formatDate(dayStart)}`;$('progressFill').style.width=(state.completed.filter(Boolean).length/5*100)+'%';$('streakLine').textContent=`${'🧡 '.repeat(state.completed.filter(Boolean).length)}${state.completed.filter(Boolean).length} / 5 days collected`;$('heroTitle').innerHTML=currentDay===5?'Happy birthday,<br><em>my favourite.</em>':currentDay===1?'Five days.<br><em>One forever.</em>':`Day ${currentDay}.<br><em>Closer to us.</em>`;$('heroSubtitle').textContent=currentDay===5?'Today, the whole little universe is celebrating you.':'Every puzzle brings you closer to a little piece of us.';
-    const active=now>=sch[idx].start&&now<sch[idx].end;show('notReady',!active);show('gamePanel',active&&currentDay<5);show('birthdayPanel',currentDay===5);show('revealPanel',currentDay>=2&&currentDay<=4);if(!active&&currentDay<5){$('notReadyText').textContent=`Your next chapter opens ${formatDate(sch[idx].start)}. Until then, your orange-heart collection is safe.`}if(currentDay<5){$('gameKicker').textContent=['DAY ONE • THREE MINI-GAMES','DAY TWO • HIDDEN LEAF MISSION','DAY THREE • VERY TRICKY MAZE','DAY FOUR • LOVE CODE'][idx];$('gameTitle').textContent=dayTitles[idx];$('gameDescription').textContent=dayDescriptions[idx];$('difficulty').textContent=['EASY + PLAYFUL','HARD • MEMORY','VERY HARD • MAZE','DIFFICULT • CIPHER'][idx];$('revealTitle').textContent=['','Your first hidden piece: I','The next piece spells LOVE','The third piece says YOU'][idx];$('revealCopy').textContent=state.revealed[idx-1]?'You earned this piece by solving today’s adventure. 🧡':'Finish today’s game to reveal this piece of our picture.';if(active&&activeGame===0&&!game.initialized)startGameForDay(currentDay);renderPhotoGrid()}else{renderBirthday()}}
+    const active=now>=sch[idx].start&&now<sch[idx].end;show('notReady',!active);show('gamePanel',active&&currentDay<5);show('birthdayPanel',currentDay===5);show('revealPanel',currentDay>=2&&currentDay<=4);if(!active&&currentDay<5){$('notReadyText').textContent=`Your next chapter opens ${formatDate(sch[idx].start)}. Until then, your orange-heart collection is safe.`}if(currentDay<5){$('gameKicker').textContent=['DAY ONE • FOUR MINI-GAMES','DAY TWO • HIDDEN LEAF MISSION','DAY THREE • VERY TRICKY MAZE','DAY FOUR • LOVE CODE'][idx];$('gameTitle').textContent=dayTitles[idx];$('gameDescription').textContent=dayDescriptions[idx];$('difficulty').textContent=['EASY + PLAYFUL','HARD • MEMORY','VERY HARD • MAZE','DIFFICULT • CIPHER'][idx];$('revealTitle').textContent=['','Your first hidden piece: I','The next piece spells LOVE','The third piece says YOU'][idx];$('revealCopy').textContent=state.revealed[idx-1]?'You earned this piece by solving today’s adventure. 🧡':'Finish today’s game to reveal this piece of our picture.';if(active&&activeGame===0&&!game.initialized)startGameForDay(currentDay);renderPhotoGrid()}else{renderBirthday()}}
   function renderJourney(){const sch=schedule(),now=new Date(),list=$('journeyList');list.innerHTML='';for(let i=0;i<5;i++){const day=i+1, passed=now>=sch[i].end, earned=state.completed[i]||passed;const div=document.createElement('div');div.className='journey-item';const label=day===5?'Birthday surprise':day===1?'Three mini-games':day===2?'Naruto-inspired memory seal':day===3?'Heart-finding maze':'Secret love cipher';const status=state.completed[i]?'🧡 Collected':passed?'🧡 Day complete':now>=sch[i].start?'♡ In progress':'🔒 Waiting';div.innerHTML=`<span class="journey-emoji">${earned?'🧡':['✨','🍥','🧩','🔐','🎂'][i]}</span><div><strong>Day ${day} · ${label}</strong><small>${formatDate(sch[i].start)}</small></div><span class="journey-status">${status}</span>`;list.appendChild(div)}}
   function renderPhotoGrid() {
   const grid = $('photoGrid');
@@ -104,9 +104,690 @@
   function newGame(){if(currentDay>=5){toast('Today’s game is the birthday heart challenge!');return}activeGame=0;startedAt=Date.now();game={};setFeedback('Fresh round, fresh butterflies. You’ve got this!');startGameForDay(currentDay)}
   function startGameForDay(day){game={initialized:true,round:1,score:0,step:0,attempts:0,selected:[],matched:[],path:[],turns:0,mini:0};startedAt=Date.now();$('elapsed').textContent='00:00';setFeedback('');if(day===1)renderDay1();if(day===2)renderDay2();if(day===3)renderDay3();if(day===4)renderDay4()}
   function hint(){if(currentDay===1){setFeedback(['Take your time; look for patterns, not speed.','Memory game: say the sequence quietly before tapping.','Word puzzle: tap words in the order they should appear.'][game.mini||0])}else if(currentDay===2)setFeedback('Hint: focus on the order of the four symbols, not how quickly they flash.');else if(currentDay===3)setFeedback('Hint: plan a route to the glowing heart. You can move with the arrow buttons; walls are dark.');else if(currentDay===4)setFeedback('Hint: A=1, B=2, C=3… Use the repeating gaps in the number code.');else toast('Follow your heart 🧡')}
-  function finishMini(message){game.score++;setFeedback(message);if(game.score>=3){completeDay(1);$('gameDescription').textContent='All three mini-games cleared! Play again or pick a new mini-game below.';const b=document.createElement('button');b.className='btn btn-primary';b.textContent='Play the mini-games again';b.onclick=()=>{game.score=0;game.mini=0;newGame()};$('gameArea').appendChild(b)}else{game.mini++;setTimeout(()=>renderDay1(),650)}}
-  function renderDay1(){const area=$('gameArea');area.innerHTML='';if(game.mini===0){area.innerHTML='<div class="subheading">Mini-game 1 of 3 · Memory Spark</div><p>Watch the four-heart sequence, then tap the matching symbols in the same order. Three rounds to pass.</p><div id="sequenceDisplay" class="sequence-display">Ready? 🧡</div><div class="tiles" id="memoryTiles"></div><div class="center"><button class="btn btn-secondary" id="showSequence">Show sequence</button></div>';const symbols=['🧡','🌙','🌸','⭐'];let seq=[];let round=0;const display=$('sequenceDisplay'),tiles=$('memoryTiles');symbols.forEach(s=>{const b=document.createElement('button');b.className='tile';b.textContent=s;b.onclick=()=>{if(!game.accepting)return;const v=seq[game.step];if(s===v){game.step++;b.classList.add('correct');if(game.step===seq.length){game.accepting=false;round++;if(round>=3)finishMini('Memory Spark cleared! 🧠');else{display.textContent=`Perfect! Round ${round}/3`;setTimeout(next,500)}}}else{display.textContent='Oops! Try that round again 💕';game.step=0;tiles.querySelectorAll('.tile').forEach(x=>x.classList.remove('correct'))}};tiles.appendChild(b)});function next(){seq=Array.from({length:3+round},()=>symbols[Math.floor(Math.random()*symbols.length)]);game.step=0;game.accepting=false;display.textContent=seq.join('  ');setTimeout(()=>{display.textContent='Now repeat it!';game.accepting=true;tiles.querySelectorAll('.tile').forEach(x=>x.classList.remove('correct'))},900)}$('showSequence').onclick=next;next()}else if(game.mini===1){area.innerHTML='<div class="subheading">Mini-game 2 of 3 · Pattern Picnic</div><p>Find the missing number. Tap the answer tile, then solve two more patterns. No MCQs: just tap the number that completes the pattern.</p><h2 class="center" id="patternQuestion"></h2><div class="tiles" id="patternTiles"></div>';const qs=[{q:'2, 4, 8, 16, __',a:32,opts:[24,30,32,36]},{q:'1, 4, 9, 16, __',a:25,opts:[20,24,25,36]},{q:'3, 6, 11, 18, __',a:27,opts:[25,26,27,29]}];let r=0;function draw(){if(r>=qs.length){finishMini('Pattern Picnic complete! Your brain has excellent taste.');return}const q=qs[r];$('patternQuestion').textContent=q.q;$('patternTiles').innerHTML='';q.opts.sort(()=>Math.random()-.5).forEach(n=>{const b=document.createElement('button');b.className='tile';b.textContent=n;b.onclick=()=>{if(n===q.a){r++;draw()}else{b.classList.add('wrong');setFeedback('Not quite, sweetheart. Look at how the numbers grow, then try again!')}};$('patternTiles').appendChild(b)})}draw()}else{area.innerHTML='<div class="subheading">Mini-game 3 of 3 · Build a Love Note</div><p>Tap the words to arrange this scrambled note into a sentence. Tap a placed word to send it back.</p><div id="wordSlots" class="word-slots"></div><div id="wordBank" class="word-bank"></div><div class="center"><button id="checkWords" class="btn btn-primary">Check our little note</button></div>';const words=['you','make','my','ordinary','days','feel','magical'];let order=words.map((w,i)=>({w,i})).sort(()=>Math.random()-.5),chosen=[];const slots=$('wordSlots'),bank=$('wordBank');function draw(){slots.innerHTML='';bank.innerHTML='';chosen.forEach((o,i)=>{const b=document.createElement('button');b.className='slot';b.textContent=o.w;b.onclick=()=>{order.push(o);chosen.splice(i,1);draw()};slots.appendChild(b)});order.forEach(o=>{const b=document.createElement('button');b.className='word-chip';b.textContent=o.w;b.onclick=()=>{chosen.push(o);order=order.filter(x=>x.i!==o.i);draw()};bank.appendChild(b)})}draw();$('checkWords').onclick=()=>{if(chosen.map(x=>x.w).join(' ')==='you make my ordinary days feel magical'){finishMini('Love note assembled perfectly. You make my ordinary days feel magical. 🧡')}else setFeedback('Almost! Rearrange the words into a sentence that makes your heart smile.') }}}
-  
+
+  function finishMini(message){
+
+  game.score++;
+
+  setFeedback(message);
+
+  if(game.score >= 3){
+
+    completeDay(1);
+
+    $('gameDescription').textContent =
+      'Day 1 complete! You collected your first orange heart. 🧡';
+
+    const replay = document.createElement('button');
+
+    replay.className = 'btn btn-primary';
+
+    replay.textContent = '🔄 Play Another Round';
+
+    replay.style.marginTop = '20px';
+
+    replay.onclick = function(){
+
+      game.score = 0;
+      game.mini = 0;
+      game.step = 0;
+      game.round = 1;
+      game.attempts = 0;
+      game.accepting = false;
+
+      setFeedback(
+        'Fresh round, fresh butterflies. Let’s play again! 🧡'
+      );
+
+      startGameForDay(1);
+
+    };
+
+    $('gameArea').appendChild(replay);
+
+  }else{
+
+    game.mini++;
+
+    setTimeout(function(){
+
+      renderDay1();
+
+    },650);
+
+  }
+
+}
+  function renderDay1(){
+
+  const area = $('gameArea');
+  area.innerHTML = '';
+
+  /* =========================================================
+     MINI-GAME 1
+     MEMORY SPARK
+     ========================================================= */
+
+  if(game.mini === 0){
+
+    area.innerHTML = `
+      <div class="subheading">Mini-game 1 of 4 · Memory Spark</div>
+
+      <p>
+        Watch the heart sequence, then tap the matching symbols
+        in the same order. Three rounds to pass.
+      </p>
+
+      <div id="sequenceDisplay"
+           class="sequence-display">
+        Ready? 🧡
+      </div>
+
+      <div class="tiles" id="memoryTiles"></div>
+
+      <div class="center">
+        <button class="btn btn-secondary" id="showSequence">
+          Show sequence
+        </button>
+      </div>
+    `;
+
+    const symbols = ['🧡','🌙','🌸','⭐'];
+
+    let seq = [];
+    let round = 0;
+
+    const display = $('sequenceDisplay');
+    const tiles = $('memoryTiles');
+
+    symbols.forEach(symbol => {
+
+      const button = document.createElement('button');
+
+      button.className = 'tile';
+      button.textContent = symbol;
+
+      button.onclick = () => {
+
+        if(!game.accepting) return;
+
+        const expected = seq[game.step];
+
+        if(symbol === expected){
+
+          game.step++;
+
+          button.classList.add('correct');
+
+          if(game.step === seq.length){
+
+            game.accepting = false;
+            round++;
+
+            if(round >= 3){
+
+              finishMini('Memory Spark cleared! 🧠');
+
+            }else{
+
+              display.textContent =
+                `Perfect! Round ${round}/3`;
+
+              setTimeout(next,500);
+            }
+          }
+
+        }else{
+
+          display.textContent =
+            'Oops! Try that round again 💕';
+
+          game.step = 0;
+
+          tiles.querySelectorAll('.tile')
+            .forEach(x =>
+              x.classList.remove('correct')
+            );
+        }
+      };
+
+      tiles.appendChild(button);
+    });
+
+    function next(){
+
+      seq = Array.from(
+        {length:3 + round},
+        () =>
+          symbols[
+            Math.floor(Math.random() * symbols.length)
+          ]
+      );
+
+      game.step = 0;
+      game.accepting = false;
+
+      display.textContent = seq.join('  ');
+
+      setTimeout(() => {
+
+        display.textContent = 'Now repeat it!';
+
+        game.accepting = true;
+
+        tiles.querySelectorAll('.tile')
+          .forEach(x =>
+            x.classList.remove('correct')
+          );
+
+      },900);
+    }
+
+    $('showSequence').onclick = next;
+
+    next();
+
+    return;
+  }
+
+
+  /* =========================================================
+     MINI-GAME 2
+     PATTERN PICNIC
+     ========================================================= */
+
+  if(game.mini === 1){
+
+    area.innerHTML = `
+      <div class="subheading">Mini-game 2 of 4 · Pattern Picnic</div>
+
+      <p>
+        Find the missing number. Tap the answer tile.
+        Solve all three patterns.
+      </p>
+
+      <h2 class="center" id="patternQuestion"></h2>
+
+      <div class="tiles" id="patternTiles"></div>
+    `;
+
+    const questions = [
+
+      {
+        q:'2, 4, 8, 16, __',
+        a:32,
+        opts:[24,30,32,36]
+      },
+
+      {
+        q:'1, 4, 9, 16, __',
+        a:25,
+        opts:[20,24,25,36]
+      },
+
+      {
+        q:'3, 6, 11, 18, __',
+        a:27,
+        opts:[25,26,27,29]
+      }
+
+    ];
+
+    let current = 0;
+
+    function drawPattern(){
+
+      if(current >= questions.length){
+
+        finishMini(
+          'Pattern Picnic complete! Your brain has excellent taste. 🧠'
+        );
+
+        return;
+      }
+
+      const question = questions[current];
+
+      $('patternQuestion').textContent =
+        question.q;
+
+      $('patternTiles').innerHTML = '';
+
+      const options =
+        [...question.opts]
+        .sort(() => Math.random() - 0.5);
+
+      options.forEach(number => {
+
+        const button =
+          document.createElement('button');
+
+        button.className = 'tile';
+        button.textContent = number;
+
+        button.onclick = () => {
+
+          if(number === question.a){
+
+            current++;
+            drawPattern();
+
+          }else{
+
+            button.classList.add('wrong');
+
+            setFeedback(
+              'Not quite, sweetheart. Try again! 💕'
+            );
+          }
+        };
+
+        $('patternTiles').appendChild(button);
+      });
+    }
+
+    drawPattern();
+
+    return;
+  }
+
+
+  /* =========================================================
+     MINI-GAME 3
+     BUILD A LOVE NOTE
+     ========================================================= */
+
+  if(game.mini === 2){
+
+    area.innerHTML = `
+      <div class="subheading">
+        Mini-game 3 of 4 · Build a Love Note
+      </div>
+
+      <p>
+        Tap the words to arrange this scrambled note
+        into the correct sentence.
+      </p>
+
+      <div id="wordSlots" class="word-slots"></div>
+
+      <div id="wordBank" class="word-bank"></div>
+
+      <div class="center">
+        <button id="checkWords"
+                class="btn btn-primary">
+          Check our little note
+        </button>
+      </div>
+    `;
+
+    const words = [
+      'you',
+      'make',
+      'my',
+      'ordinary',
+      'days',
+      'feel',
+      'magical'
+    ];
+
+    let order =
+      words.map((word,index)=>({
+        word:word,
+        index:index
+      }))
+      .sort(() => Math.random() - 0.5);
+
+    let chosen = [];
+
+    const slots = $('wordSlots');
+    const bank = $('wordBank');
+
+    function drawWords(){
+
+      slots.innerHTML = '';
+      bank.innerHTML = '';
+
+      chosen.forEach((item,index) => {
+
+        const button =
+          document.createElement('button');
+
+        button.className = 'slot';
+        button.textContent = item.word;
+
+        button.onclick = () => {
+
+          order.push(item);
+          chosen.splice(index,1);
+
+          drawWords();
+        };
+
+        slots.appendChild(button);
+      });
+
+      order.forEach(item => {
+
+        const button =
+          document.createElement('button');
+
+        button.className = 'word-chip';
+        button.textContent = item.word;
+
+        button.onclick = () => {
+
+          chosen.push(item);
+
+          order =
+            order.filter(
+              x => x.index !== item.index
+            );
+
+          drawWords();
+        };
+
+        bank.appendChild(button);
+      });
+    }
+
+    drawWords();
+
+    $('checkWords').onclick = () => {
+
+      const answer =
+        chosen.map(x => x.word).join(' ');
+
+      if(answer ===
+         'you make my ordinary days feel magical'){
+
+        finishMini(
+          'Love note assembled perfectly! 🧡'
+        );
+
+      }else{
+
+        setFeedback(
+          'Almost! Rearrange the words into the perfect love note. 💕'
+        );
+      }
+    };
+
+    return;
+  }
+
+
+  /* =========================================================
+     MINI-GAME 4
+     4 × 4 JIGSAW PICTURE PUZZLE
+     ========================================================= */
+
+  if(game.mini === 3){
+
+    area.innerHTML = `
+      <div class="subheading">
+        Mini-game 4 of 4 · Our Love Jigsaw 🧩
+      </div>
+
+      <p>
+        Put all 16 pieces in the correct positions
+        to complete the picture. Click two pieces to swap them.
+      </p>
+
+      <div class="center" style="margin-bottom:15px;">
+        <strong id="jigsawStatus">
+          Select two pieces to swap
+        </strong>
+      </div>
+
+      <div id="jigsawPuzzle"
+           style="
+             width:min(90vw,420px);
+             aspect-ratio:1/1;
+             margin:0 auto 18px;
+             display:grid;
+             grid-template-columns:repeat(4,1fr);
+             grid-template-rows:repeat(4,1fr);
+             gap:3px;
+             padding:3px;
+             background:#222;
+             border-radius:12px;
+             overflow:hidden;
+           ">
+      </div>
+
+      <div class="center">
+        <button class="btn btn-secondary"
+                id="shuffleJigsaw">
+          🔀 Shuffle Puzzle
+        </button>
+      </div>
+    `;
+
+    /* ---------------------------------------------------------
+       JIGSAW SETTINGS
+       --------------------------------------------------------- */
+
+    const TOTAL = 16;
+
+    const puzzle =
+      $('jigsawPuzzle');
+
+    const status =
+      $('jigsawStatus');
+
+    const IMAGE =
+      'assets/love-photo1.jpeg';
+
+    let pieces =
+      Array.from(
+        {length:TOTAL},
+        (_,index)=>index
+      );
+
+    let firstSelected = null;
+
+
+    /* ---------------------------------------------------------
+       SHUFFLE
+       --------------------------------------------------------- */
+
+    function shufflePieces(){
+
+      do{
+
+        pieces =
+          Array.from(
+            {length:TOTAL},
+            (_,index)=>index
+          );
+
+        for(let i=pieces.length-1;i>0;i--){
+
+          const j =
+            Math.floor(
+              Math.random() * (i+1)
+            );
+
+          [
+            pieces[i],
+            pieces[j]
+          ] =
+          [
+            pieces[j],
+            pieces[i]
+          ];
+        }
+
+      }while(
+        pieces.every(
+          (piece,index)=>piece === index
+        )
+      );
+
+      firstSelected = null;
+
+      drawPuzzle();
+
+      status.textContent =
+        'Select two pieces to swap 🧩';
+    }
+
+
+    /* ---------------------------------------------------------
+       DRAW PUZZLE
+       --------------------------------------------------------- */
+
+    function drawPuzzle(){
+
+      puzzle.innerHTML = '';
+
+      pieces.forEach((correctPosition,index) => {
+
+        const button =
+          document.createElement('button');
+
+        button.type = 'button';
+
+        button.setAttribute(
+          'aria-label',
+          `Puzzle piece ${index + 1}`
+        );
+
+        button.style.cssText = `
+          width:100%;
+          height:100%;
+          padding:0;
+          margin:0;
+          border:0;
+          cursor:pointer;
+          background-image:url("${IMAGE}");
+          background-repeat:no-repeat;
+          background-size:400% 400%;
+          background-position:
+            ${(correctPosition % 4) * 33.333333}%
+            ${Math.floor(correctPosition / 4) * 33.333333}%;
+          transition:transform .15s, box-shadow .15s;
+        `;
+
+        if(firstSelected === index){
+
+          button.style.boxShadow =
+            'inset 0 0 0 4px #ff4f81';
+
+          button.style.transform =
+            'scale(.94)';
+        }
+
+        button.onclick = () => {
+
+          /* First piece */
+
+          if(firstSelected === null){
+
+            firstSelected = index;
+
+            status.textContent =
+              'Now select another piece 💕';
+
+            drawPuzzle();
+
+            return;
+          }
+
+
+          /* Click same piece again */
+
+          if(firstSelected === index){
+
+            firstSelected = null;
+
+            status.textContent =
+              'Select two pieces to swap 🧩';
+
+            drawPuzzle();
+
+            return;
+          }
+
+
+          /* Second piece */
+
+          const secondSelected = index;
+
+          [
+            pieces[firstSelected],
+            pieces[secondSelected]
+          ] =
+          [
+            pieces[secondSelected],
+            pieces[firstSelected]
+          ];
+
+          firstSelected = null;
+
+          drawPuzzle();
+
+
+          /* Check if puzzle is solved */
+
+          const solved =
+            pieces.every(
+              (piece,index)=>piece === index
+            );
+
+          if(solved){
+
+            status.textContent =
+              '🎉 You completed our picture! 🧡';
+
+            setFeedback(
+              'Jigsaw complete! You found every piece of us. 🧩🧡'
+            );
+
+            setTimeout(() => {
+
+              finishMini(
+                'Our picture is complete! 🧡'
+              );
+
+            },700);
+
+          }else{
+
+            status.textContent =
+              'Good move! Keep going 🧩💕';
+          }
+        };
+
+        puzzle.appendChild(button);
+      });
+    }
+
+
+    /* ---------------------------------------------------------
+       SHUFFLE BUTTON
+       --------------------------------------------------------- */
+
+    $('shuffleJigsaw').onclick = () => {
+
+      shufflePieces();
+
+      setFeedback(
+        'The puzzle has been shuffled. Can you put us back together? 🧩💕'
+      );
+    };
+
+
+    /* ---------------------------------------------------------
+       START PUZZLE
+       --------------------------------------------------------- */
+
+    shufflePieces();
+
+  }
+
+}  
 function renderDay2(){
 
   const area = $('gameArea');
